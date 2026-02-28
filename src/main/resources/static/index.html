@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent 对话助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            max-height: 800px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message.assistant {
+            justify-content: flex-start;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .assistant .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message-meta {
+            font-size: 11px;
+            margin-top: 5px;
+            opacity: 0.6;
+            padding: 0 5px;
+        }
+        
+        .details {
+            margin-top: 10px;
+            font-size: 12px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            max-width: 70%;
+        }
+        
+        .details-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #667eea;
+        }
+        
+        .details-item {
+            margin: 5px 0;
+            padding-left: 10px;
+            border-left: 2px solid #667eea;
+            color: #555;
+        }
+        
+        .steps-section {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .step-item {
+            margin: 8px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .step-label {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 11px;
+        }
+        
+        .step-value {
+            color: #666;
+            margin-top: 3px;
+            font-size: 12px;
+        }
+        
+        .input-area {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-area input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .input-area input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .input-area button {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 14px;
+        }
+        
+        .input-area button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .input-area button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            color: #667eea;
+            font-size: 13px;
+            max-width: 70%;
+        }
+        
+        .loading-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: pulse 1.4s infinite;
+        }
+        
+        .loading-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .loading-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .loading-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes pulse {
+            0%, 60%, 100% {
+                opacity: 0.3;
+            }
+            30% {
+                opacity: 1;
+            }
+        }
+        
+        .error {
+            background: #fef3f2;
+            color: #d32f2f;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 3px solid #d32f2f;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        
+        .stat-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin: 3px 3px 3px 0;
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            text-align: center;
+        }
+        
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .empty-state h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            font-size: 13px;
+            color: #bbb;
+        }
+        
+        @media (max-width: 600px) {
+            .message-content,
+            .details {
+                max-width: 100%;
+            }
+            
+            .header h1 {
+                font-size: 18px;
+            }
+            
+            .input-area {
+                flex-direction: column;
+            }
+            
+            .input-area button {
+                width: 100%;
+            }
+        }
+        
+        .chat-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chat-area::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .chat-area::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+        
+        .chat-area::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Agent 对话助手</h1>
+            <p>由 DeepSeek API 驱动 | 支持自动任务执行</p>
+        </div>
+        
+        <div class="chat-area" id="chatArea">
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <h2>开始对话</h2>
+                <p>尝试问我任何问题，例如计算、字符串处理等</p>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <input 
+                type="text" 
+                id="messageInput" 
+                placeholder="输入你的问题... (例如：计算 100 + 200)"
+                autocomplete="off"
+            >
+            <button id="sendBtn" onclick="sendMessage()">发送</button>
+        </div>
+    </div>
+    
+    <script>
+        const chatArea = document.getElementById('chatArea');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        let isLoading = false;
+        
+        // 初始化
+        function init() {
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !isLoading) {
+                    sendMessage();
+                }
+            });
+            
+            // 检查后端是否在线
+            checkBackend();
+        }
+        
+        // 检查后端连接
+        function checkBackend() {
+            fetch('/api/agent/health')
+                .then(r => r.json())
+                .catch(() => {
+                    showError('⚠️ 后端服务未连接，请检查服务状态');
+                });
+        }
+        
+        // 清空空状态
+        function clearEmptyState() {
+            const emptyState = chatArea.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+        }
+        
+        // 发送消息
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || isLoading) return;
+            
+            clearEmptyState();
+            
+            // 显示用户消息
+            addMessage(message, 'user');
+            messageInput.value = '';
+            messageInput.disabled = true;
+            sendBtn.disabled = true;
+            isLoading = true;
+            
+            // 显示加载指示
+            const loadingElement = document.createElement('div');
+            loadingElement.className = 'message assistant';
+            loadingElement.innerHTML = `
+                <div class="message-content">
+                    <div class="loading">
+                        <span class="loading-dot"></span>
+                        <span class="loading-dot"></span>
+                        <span class="loading-dot"></span>
+                        正在思考...
+                    </div>
+                </div>
+            `;
+            chatArea.appendChild(loadingElement);
+            scrollToBottom();
+            
+            // 发送到后端
+            fetch('/api/agent/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    query: message,
+                    includeDetails: true
+                })
+            })
+            .then(r => {
+                if (!r.ok) throw new Error('请求失败: ' + r.status);
+                return r.json();
+            })
+            .then(data => {
+                // 移除加载指示
+                loadingElement.remove();
+                
+                // 显示结果
+                if (data.result) {
+                    addMessage(data.result, 'assistant', data);
+                } else {
+                    showError('未获取到结果');
+                }
+            })
+            .catch(err => {
+                loadingElement.remove();
+                showError('错误: ' + err.message);
+            })
+            .finally(() => {
+                messageInput.disabled = false;
+                sendBtn.disabled = false;
+                isLoading = false;
+                messageInput.focus();
+            });
+        }
+        
+        // 添加消息到聊天区域
+        function addMessage(content, role, data = null) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${role}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            
+            msgDiv.appendChild(contentDiv);
+            
+            // 添加元数据和详细信息
+            if (role === 'assistant' && data) {
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'message-meta';
+                metaDiv.innerHTML = `
+                    ⏱️ ${data.duration_ms}ms 
+                    | 🔄 ${data.iterations} 轮
+                    ${data.is_complete ? '✓ 完成' : '⚠️ 未完成'}
+                `;
+                msgDiv.appendChild(metaDiv);
+                
+                // 显示详细步骤
+                if (data.steps && data.steps.length > 0) {
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.className = 'details steps-section';
+                    
+                    let stepsHTML = '<div class="details-title">🧠 推理过程</div>';
+                    data.steps.forEach((step, idx) => {
+                        stepsHTML += `
+                            <div class="step-item">
+                                <div class="step-label">步骤 ${idx + 1}: ${step.action || '思考'}</div>
+                                ${step.thought ? `<div class="step-value"><strong>思考:</strong> ${escapeHtml(step.thought)}</div>` : ''}
+                                ${step.action_input ? `<div class="step-value"><strong>输入:</strong> ${escapeHtml(step.action_input)}</div>` : ''}
+                            </div>
+                        `;
+                    });
+                    detailsDiv.innerHTML = stepsHTML;
+                    msgDiv.appendChild(detailsDiv);
+                }
+                
+                // 显示工具调用结果
+                if (data.tool_results && data.tool_results.length > 0) {
+                    const toolsDiv = document.createElement('div');
+                    toolsDiv.className = 'details steps-section';
+                    
+                    let toolsHTML = '<div class="details-title">🔧 工具调用</div>';
+                    data.tool_results.forEach((tool, idx) => {
+                        toolsHTML += `
+                            <div class="step-item">
+                                <div class="step-label">
+                                    ${tool.tool_name} 
+                                    ${tool.success ? '✓' : '✗'}
+                                </div>
+                                <div class="step-value"><strong>结果:</strong> ${escapeHtml(tool.result)}</div>
+                                <div class="step-value" style="font-size: 11px; color: #999;">
+                                    ⏱️ ${tool.execution_time_ms}ms
+                                    ${tool.error ? ` | ❌ ${tool.error}` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    toolsDiv.innerHTML = toolsHTML;
+                    msgDiv.appendChild(toolsDiv);
+                }
+            }
+            
+            chatArea.appendChild(msgDiv);
+            scrollToBottom();
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message assistant';
+            msgDiv.appendChild(errorDiv);
+            
+            chatArea.appendChild(msgDiv);
+            scrollToBottom();
+        }
+        
+        // 滚动到底部
+        function scrollToBottom() {
+            setTimeout(() => {
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }, 0);
+        }
+        
+        // HTML 转义
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+        
+        // 初始化
+        init();
+    </script>
+</body>
+</html>
