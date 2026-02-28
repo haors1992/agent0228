@@ -523,7 +523,7 @@ logging:
 echo $DEEPSEEK_API_KEY
 
 # 如果为空，设置环境变量
-export DEEPSEEK_API_KEY="sk-6c677513426744a6833bd437bbc8733c"
+export DEEPSEEK_API_KEY="your-api-key-here"
 
 # 然后重新启动应用
 mvn spring-boot:run
