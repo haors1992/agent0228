@@ -100,19 +100,35 @@
    java -jar target/agent0228-1.0.0.jar
    ```
 
-   **方式 C：Debug 模式启动**
-   ```bash
-   export DEEPSEEK_API_KEY="your-api-key-here"
-   mvn spring-boot:run -Dspring-boot.run.arguments="--debug"
-   ```
+   **方式 C：IDE 调试模式（推荐）**
+   
+   在 IntelliJ IDEA 或 VS Code 中：
+   - 设置断点（点击代码行号左边）
+   - Run → Debug 'Agent0228Application'
+   - 应用会在断点处暂停，可以逐步执行和检查变量
 
-   **方式 D：JDWP 远程调试**
+   **方式 D：JDWP 远程调试（命令行）**
+   
+   1. 先编译：
+   ```bash
+   mvn clean package -DskipTests
+   ```
+   
+   2. 启动应用（暂停等待调试器）：
    ```bash
    export DEEPSEEK_API_KEY="your-api-key-here"
-   java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 \
+   java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005 \
      -jar target/agent0228-1.0.0.jar
    ```
-   然后在 IDE 中配置远程调试，连接到 localhost:5005
+   
+   3. 在 IDE 中连接远程调试：
+      - **IntelliJ**: Run → Edit Configurations → Remote → localhost:5005
+      - **VS Code**: 使用 Java Debug 扩展配置远程调试
+   
+   **参数说明：**
+   - `suspend=y` - 启动时暂停（等待调试器连接）
+   - `suspend=n` - 立即启动，调试器可随时连接
+   - `address=5005` - 调试服务监听的端口号
 
    应用将在 `http://localhost:8080` 启动
 
@@ -437,22 +453,27 @@ logging:
 
 ### IDE 集成调试
 
-**IntelliJ IDEA / Android Studio：**
-1. 点击 Run → Edit Configurations
-2. 创建新的 Spring Boot 配置
-3. 设置环境变量：`DEEPSEEK_API_KEY=your-key`
-4. 点击 Debug 按钮启动调试
+**IntelliJ IDEA / Android Studio（推荐）：**
+1. 在要调试的代码行，点击左边行号区域设置断点（红色圆点）
+2. 顶部菜单：Run → Debug 'Agent0228Application'
+3. 应用启动后，执行会在断点处暂停
+4. 在 Debug 面板中可以：
+   - 查看局部变量和对象状态
+   - 逐行执行代码（Step Over）
+   - 进入方法内部（Step Into）
+   - 继续执行（Resume）
+5. 鼠标悬停在变量上可查看当前值
 
 **VS Code：**
-1. 安装 Extension Pack for Java
-2. 创建 `.vscode/launch.json`：
+1. 安装 Extension Pack for Java 扩展
+2. 创建或编辑 `.vscode/launch.json`：
    ```json
    {
      "version": "0.2.0",
      "configurations": [
        {
          "type": "java",
-         "name": "Spring Boot App",
+         "name": "Debug Spring Boot",
          "request": "launch",
          "mainClass": "com.agent.Agent0228Application",
          "projectName": "agent0228",
@@ -465,7 +486,8 @@ logging:
      ]
    }
    ```
-3. 在代码中设置断点，按 F5 调试
+3. 在代码中设置断点（点击行号左边）
+4. 按 F5 或点击 Run and Debug 的绿色运行按钮启动调试
 
 ## 🔐 安全建议
 
@@ -582,6 +604,40 @@ registry.addMapping("/**")
     .allowedMethods("*")
     .allowedHeaders("*");
 ```
+
+### 问题 7：断点调试不工作
+
+**症状**：使用 `mvn spring-boot:run` 启动后，IDE 中的断点没有触发
+
+**根本原因**：
+- `mvn spring-boot:run -Dspring-boot.run.arguments="--debug"` **只是启用调试日志**，不启动 Java 调试器
+- `--debug` 参数会让应用打印更多 DEBUG 级别的日志，不会让应用进入断点
+
+**解决方案**：
+
+**方案 A（推荐）：IDE 中直接调试**
+1. IntelliJ IDEA：Run → Debug 'Agent0228Application'
+2. VS Code：F5 或点击 Run and Debug 的绿色运行按钮
+3. 在代码行号左边点击设置断点
+4. 应用会在断点处自动暂停
+
+**方案 B：命令行远程调试**
+1. 编译：`mvn clean package -DskipTests`
+2. 启动应用（暂停等待调试器）：
+   ```bash
+   export DEEPSEEK_API_KEY="your-api-key"
+   java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005 \
+     -jar target/agent0228-1.0.0.jar
+   ```
+3. IDE 中配置连接到 `localhost:5005`
+
+**JDWP 参数说明：**
+| 参数 | 含义 | 常用值 |
+|------|------|--------|
+| `transport` | 传输方式 | `dt_socket`（Socket）/ `dt_shmem`（共享内存） |
+| `server` | 作为调试服务器 | `y`（是）/ `n`（否） |
+| `suspend` | 启动时是否暂停 | `y`（暂停等待调试器）/ `n`（立即启动） |
+| `address` | 监听地址和端口 | `5005`（端口号）/ `localhost:5005` |
 
 ## 📄 许可证
 
