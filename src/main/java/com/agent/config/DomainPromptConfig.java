@@ -231,9 +231,9 @@ public class DomainPromptConfig {
         String lowerQuery = query.toLowerCase();
         
         // 医疗关键词：扩展关键词列表以提高识别率
-        if (containsKeyword(lowerQuery, "医疗", "医生", "医院", "病", "症状", "疾病", "痛", "药", "健康", 
-                "感到", "应该吃", "检查", // 特定医疗问题短语
-                "medical", "doctor", "hospital", "disease", "symptom", "medicine", "health", "diagnos", "patient")) {
+        if (containsKeyword(lowerQuery, "医疗", "医生", "医院", "病", "症状", "疾病", "痛", "头痛", "药", "吃药", "健康", 
+                "感到", "应该吃", "检查", "咳嗽", "发烧", "腹泻", "过敏", "感染", // 特定医疗问题短语
+                "medical", "doctor", "hospital", "disease", "symptom", "medicine", "health", "diagnos", "patient", "treatment", "pharmaceutical")) {
             return getMedicalPrompt();
         }
         // 法律关键词
