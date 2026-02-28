@@ -1,5 +1,6 @@
 package com.agent.reasoning.prompt;
 
+import com.agent.config.DomainPromptConfig;
 import com.agent.tool.registry.ToolRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -9,32 +10,63 @@ import org.springframework.stereotype.Component;
  * 
  * Builds the system prompt for the Agent
  * Instructs the LLM how to think and use tools
+ * 
+ * 支持多领域专业化配置
  */
 @Slf4j
 @Component
 public class SystemPromptBuilder {
     
     private final ToolRegistry toolRegistry;
+    private final DomainPromptConfig domainPromptConfig;
     
-    public SystemPromptBuilder(ToolRegistry toolRegistry) {
+    public SystemPromptBuilder(ToolRegistry toolRegistry, DomainPromptConfig domainPromptConfig) {
         this.toolRegistry = toolRegistry;
+        this.domainPromptConfig = domainPromptConfig;
     }
     
     /**
      * Build the system prompt with tool definitions
      */
     public String buildSystemPrompt() {
-        return buildSystemPrompt(null);
+        return buildSystemPrompt(null, null);
     }
     
     /**
      * Build the system prompt with optional custom instructions
      */
     public String buildSystemPrompt(String customInstructions) {
+        return buildSystemPrompt(customInstructions, null);
+    }
+    
+    /**
+     * Build the system prompt with domain detection
+     * 根据查询自动检测领域并应用相应的专业提示
+     */
+    public String buildSystemPromptWithDomainDetection(String query) {
+        String domainPrompt = domainPromptConfig.detectAndGetDomainPrompt(query);
+        return buildSystemPrompt(domainPrompt, query);
+    }
+    
+    /**
+     * Build the system prompt with custom instructions and domain information
+     */
+    private String buildSystemPrompt(String customInstructions, String query) {
         StringBuilder prompt = new StringBuilder();
         
-        // Basic system role
-        prompt.append("You are an AI Assistant with the ability to use tools to help answer questions and solve problems.\n\n");
+        // 如果有自定义指令（来自领域配置），直接使用
+        if (customInstructions != null && !customInstructions.isEmpty() && customInstructions.contains("===")) {
+            // 这是一个完整的领域提示
+            prompt.append(customInstructions).append("\n\n");
+        } else {
+            // 基础系统角色
+            prompt.append("You are an AI Assistant with the ability to use tools to help answer questions and solve problems.\n\n");
+            
+            // 如果有自定义指令，追加到这后面
+            if (customInstructions != null && !customInstructions.isEmpty()) {
+                prompt.append(customInstructions).append("\n\n");
+            }
+        }
         
         // Tool instructions
         prompt.append("=== AVAILABLE TOOLS ===\n");
@@ -56,12 +88,6 @@ public class SystemPromptBuilder {
         prompt.append("You can repeat Thought/Action/Observation cycles as many times as needed.\n");
         prompt.append("When you can answer the user's question directly, respond with:\n");
         prompt.append("Final Answer: [Your final answer to the user]\n\n");
-        
-        // Custom instructions
-        if (customInstructions != null && !customInstructions.isEmpty()) {
-            prompt.append("=== ADDITIONAL INSTRUCTIONS ===\n");
-            prompt.append(customInstructions).append("\n\n");
-        }
         
         // Important notes
         prompt.append("=== IMPORTANT NOTES ===\n");
