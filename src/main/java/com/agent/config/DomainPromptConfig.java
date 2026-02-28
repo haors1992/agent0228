@@ -230,25 +230,40 @@ public class DomainPromptConfig {
         
         String lowerQuery = query.toLowerCase();
         
-        if (containsKeyword(lowerQuery, "医疗", "病", "症状", "医学", "drug", "medicine", "health", "diagnos")) {
+        // 医疗关键词：扩展关键词列表以提高识别率
+        if (containsKeyword(lowerQuery, "医疗", "医生", "医院", "病", "症状", "疾病", "痛", "药", "健康", 
+                "感到", "应该吃", "检查", // 特定医疗问题短语
+                "medical", "doctor", "hospital", "disease", "symptom", "medicine", "health", "diagnos", "patient")) {
             return getMedicalPrompt();
         }
-        if (containsKeyword(lowerQuery, "法律", "合同", "law", "legal", "attorney", "court")) {
+        // 法律关键词
+        if (containsKeyword(lowerQuery, "法律", "合同", "权利", "律师", "法规", "条款", "协议", "法律问题",
+                "law", "legal", "attorney", "court", "contract")) {
             return getLegalPrompt();
         }
-        if (containsKeyword(lowerQuery, "编程", "代码", "code", "program", "java", "python", "javascript", "algorithm")) {
+        // 编程关键词
+        if (containsKeyword(lowerQuery, "编程", "代码", "java", "python", "javascript", "算法", "编程问题",
+                "code", "program", "algorithm", "function", "class", "object")) {
             return getProgrammingPrompt();
         }
-        if (containsKeyword(lowerQuery, "投资", "财务", "金融", "finance", "invest", "stock", "fund")) {
+        // 财务关键词
+        if (containsKeyword(lowerQuery, "投资", "财务", "金融", "基金", "股票", "经济", "理财", "财务问题",
+                "finance", "invest", "stock", "fund", "economy", "money", "planning", "budget", "advice")) {
             return getFinancePrompt();
         }
-        if (containsKeyword(lowerQuery, "物理", "化学", "生物", "science", "physics", "chemistry", "biology")) {
+        // 科学关键词
+        if (containsKeyword(lowerQuery, "物理", "化学", "生物", "科学", "实验", "原理",
+                "science", "physics", "chemistry", "biology", "experiment")) {
             return getScienceEducationPrompt();
         }
-        if (containsKeyword(lowerQuery, "写作", "文章", "创意", "content", "write", "blog", "story")) {
+        // 内容创作关键词
+        if (containsKeyword(lowerQuery, "写作", "文章", "创意", "博客", "社交", "内容",
+                "content", "write", "blog", "article", "story")) {
             return getContentCreationPrompt();
         }
-        if (containsKeyword(lowerQuery, "数据", "分析", "统计", "analytics", "data", "sql", "chart")) {
+        // 数据分析关键词
+        if (containsKeyword(lowerQuery, "数据", "分析", "统计", "图表", "报告",
+                "analytics", "data", "sql", "chart", "analysis")) {
             return getDataAnalyticsPrompt();
         }
         
