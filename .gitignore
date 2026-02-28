@@ -69,3 +69,6 @@ yarn-error.log
 
 # Runtime
 app.log
+
+# Documentation
+README.md
