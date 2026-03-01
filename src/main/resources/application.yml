@@ -18,7 +18,7 @@ logging:
 llm:
   deepseek:
     enabled: true
-    api-key: sk-6c677513426744a6833bd437bbc8733c
+    api-key: ${DEEPSEEK_API_KEY:}
     base-url: https://api.deepseek.com
     model: deepseek-chat
     max-tokens: 4096
@@ -30,8 +30,6 @@ agent:
   max-iterations: 10
   timeout: 300
   enable-streaming: false
-  session:
-    storage-path: ./data/sessions
 
 server:
   port: 8080
