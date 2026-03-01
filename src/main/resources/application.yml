@@ -30,6 +30,13 @@ agent:
   max-iterations: 10
   timeout: 300
   enable-streaming: false
+  session:
+    storage-path: ./data/sessions
+  knowledge:
+    enabled: true
+    storage-path: ./data/knowledge
+    top-k: 3
+    embedding-model: local
 
 server:
   port: 8080

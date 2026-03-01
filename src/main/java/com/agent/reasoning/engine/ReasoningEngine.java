@@ -1,5 +1,6 @@
 package com.agent.reasoning.engine;
 
+import com.agent.knowledge.service.KnowledgeBaseManager;
 import com.agent.llm.model.dto.ChatRequest;
 import com.agent.llm.model.dto.ChatResponse;
 import com.agent.llm.model.dto.Message;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Reasoning Engine
@@ -29,6 +31,7 @@ public class ReasoningEngine {
     private final LLMService llmService;
     private final ToolExecutor toolExecutor;
     private final SystemPromptBuilder promptBuilder;
+    private final KnowledgeBaseManager knowledgeBaseManager;
 
     @Value("${agent.max-iterations:10}")
     private Integer maxIterations;
@@ -36,10 +39,19 @@ public class ReasoningEngine {
     @Value("${agent.timeout:300}")
     private Integer timeout;
 
-    public ReasoningEngine(LLMService llmService, ToolExecutor toolExecutor, SystemPromptBuilder promptBuilder) {
+    @Value("${agent.knowledge.enabled:true}")
+    private Boolean knowledgeEnabled;
+
+    @Value("${agent.knowledge.top-k:3}")
+    private Integer knowledgeTopK;
+
+    public ReasoningEngine(LLMService llmService, ToolExecutor toolExecutor,
+            SystemPromptBuilder promptBuilder,
+            KnowledgeBaseManager knowledgeBaseManager) {
         this.llmService = llmService;
         this.toolExecutor = toolExecutor;
         this.promptBuilder = promptBuilder;
+        this.knowledgeBaseManager = knowledgeBaseManager;
     }
 
     /**
@@ -58,7 +70,7 @@ public class ReasoningEngine {
     /**
      * Execute the Agent's reasoning loop with conversation context
      * 
-     * @param userQuery The user's question
+     * @param userQuery           The user's question
      * @param conversationHistory Previous conversation messages for context
      * @return ExecutionContext with the final answer and all intermediate steps
      */
@@ -90,12 +102,12 @@ public class ReasoningEngine {
                         String[] parts = history.split(":", 2);
                         String role = parts[0].trim().toLowerCase();
                         String content = parts[1].trim();
-                        
+
                         // Skip the current message if it's the latest user query
                         if ("user".equals(role) && content.equals(userQuery)) {
                             continue;
                         }
-                        
+
                         messages.add(Message.builder()
                                 .role(role)
                                 .content(content)
@@ -103,6 +115,33 @@ public class ReasoningEngine {
                     }
                 }
                 log.info("✅ Context loaded: {} previous messages added", messages.size() - 1);
+            }
+
+            // Add knowledge base context if enabled
+            if (knowledgeEnabled != null && knowledgeEnabled &&
+                    knowledgeBaseManager != null && knowledgeBaseManager.getStats().getTotalDocuments() > 0) {
+
+                List<KnowledgeBaseManager.SearchResult> knowledgeResults = knowledgeBaseManager
+                        .semanticSearch(userQuery, knowledgeTopK);
+
+                if (!knowledgeResults.isEmpty()) {
+                    StringBuilder knowledgeContext = new StringBuilder();
+                    knowledgeContext.append("📚 相关知识库内容：\n");
+
+                    for (KnowledgeBaseManager.SearchResult result : knowledgeResults) {
+                        knowledgeContext.append(String.format("[%s] (相似度: %.2f)\n%s\n\n",
+                                result.getTitle(),
+                                result.getSimilarity() * 100,
+                                result.getSummary()));
+                    }
+
+                    messages.add(Message.builder()
+                            .role("system")
+                            .content(knowledgeContext.toString())
+                            .build());
+
+                    log.info("🧠 Knowledge base context added: {} documents", knowledgeResults.size());
+                }
             }
 
             // Main reasoning loop
