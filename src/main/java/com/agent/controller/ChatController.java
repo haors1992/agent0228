@@ -1,19 +1,23 @@
 package com.agent.controller;
 
+import com.agent.model.dto.ChatSession;
 import com.agent.reasoning.engine.ExecutionContext;
 import com.agent.reasoning.engine.ReasoningEngine;
+import com.agent.service.SessionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
  * Chat Controller
  * 
  * REST API endpoints for agent interactions
+ * 支持多轮对话历史存储
  */
 @Slf4j
 @RestController
@@ -21,16 +25,19 @@ import java.util.stream.Collectors;
 public class ChatController {
     
     private final ReasoningEngine reasoningEngine;
+    private final SessionManager sessionManager;
     
-    public ChatController(ReasoningEngine reasoningEngine) {
+    public ChatController(ReasoningEngine reasoningEngine, SessionManager sessionManager) {
         this.reasoningEngine = reasoningEngine;
+        this.sessionManager = sessionManager;
     }
     
     /**
      * Chat endpoint - Execute agent reasoning for a user query
+     * 支持会话历史存储
      * 
-     * @param request Request body containing the user query
-     * @return Agent response with result, steps, and duration
+     * @param request Request body containing the user query and optional sessionId
+     * @return Agent response with result, steps, duration and sessionId
      */
     @PostMapping("/chat")
     public ResponseEntity<Map<String, Object>> chat(@RequestBody ChatRequest request) {
@@ -43,19 +50,37 @@ public class ChatController {
         }
         
         try {
+            // 获取或创建会话
+            String sessionId = request.getSessionId();
+            if (sessionId == null || sessionId.isEmpty()) {
+                sessionId = UUID.randomUUID().toString();
+            }
+            ChatSession session = sessionManager.getOrCreateSession(sessionId);
+            
             long startTime = System.currentTimeMillis();
+            
+            // 添加用户消息到历史
+            session.addMessage("user", request.getQuery());
             
             // Execute the agent reasoning
             ExecutionContext context = reasoningEngine.execute(request.getQuery());
+            
+            // 添加助手回复到历史
+            session.addMessage("assistant", context.getFinalAnswer());
+            
+            // 保存会话
+            sessionManager.saveSession(session);
             
             long duration = System.currentTimeMillis() - startTime;
             
             // Build response
             Map<String, Object> response = new HashMap<>();
+            response.put("sessionId", sessionId);
             response.put("result", context.getFinalAnswer());
             response.put("iterations", context.getCurrentIteration());
             response.put("duration_ms", duration);
             response.put("is_complete", context.getIsComplete());
+            response.put("messageCount", session.getMessageCount());
             
             // Add detailed steps if requested
             if (request.isIncludeDetails()) {
@@ -82,7 +107,8 @@ public class ChatController {
                     .collect(Collectors.toList()));
             }
             
-            log.info("Chat request completed in {}ms with {} iterations", duration, context.getCurrentIteration());
+            log.info("Chat request completed in {}ms with {} iterations, sessionId: {}", 
+                duration, context.getCurrentIteration(), sessionId);
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
@@ -105,9 +131,11 @@ public class ChatController {
     
     /**
      * Request body for chat endpoint
+     * 支持 sessionId 用于多轮对话
      */
     public static class ChatRequest {
         private String query;
+        private String sessionId;
         private boolean includeDetails = false;
         
         public ChatRequest() {}
@@ -116,8 +144,14 @@ public class ChatController {
             this.query = query;
         }
         
-        public ChatRequest(String query, boolean includeDetails) {
+        public ChatRequest(String query, String sessionId) {
             this.query = query;
+            this.sessionId = sessionId;
+        }
+        
+        public ChatRequest(String query, String sessionId, boolean includeDetails) {
+            this.query = query;
+            this.sessionId = sessionId;
             this.includeDetails = includeDetails;
         }
         
@@ -127,6 +161,14 @@ public class ChatController {
         
         public void setQuery(String query) {
             this.query = query;
+        }
+        
+        public String getSessionId() {
+            return sessionId;
+        }
+        
+        public void setSessionId(String sessionId) {
+            this.sessionId = sessionId;
         }
         
         public boolean isIncludeDetails() {
@@ -141,6 +183,7 @@ public class ChatController {
         public String toString() {
             return "ChatRequest{" +
                 "query='" + query + '\'' +
+                ", sessionId='" + sessionId + '\'' +
                 ", includeDetails=" + includeDetails +
                 '}';
         }
