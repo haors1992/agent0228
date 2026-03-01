@@ -825,12 +825,24 @@
             scrollToBottom();
             
             try {
+                // 获取当前会话的历史消息作为上下文
+                let conversationHistory = [];
+                const historyResponse = await fetch(`/api/chat/history/sessions/${currentSessionId}`);
+                const historyData = await historyResponse.json();
+                
+                if (historyData.messages && historyData.messages.length > 0) {
+                    conversationHistory = historyData.messages
+                        .filter(msg => msg.content !== message) // 排除当前消息
+                        .map(msg => msg.role.toUpperCase() + ": " + msg.content);
+                }
+                
                 const response = await fetch('/api/agent/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         query: message,
                         sessionId: currentSessionId,
+                        conversationHistory: conversationHistory,
                         includeDetails: true
                     })
                 });

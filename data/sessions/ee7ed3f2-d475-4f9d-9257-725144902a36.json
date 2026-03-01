@@ -1,0 +1,18 @@
+{
+  "sessionId" : "ee7ed3f2-d475-4f9d-9257-725144902a36",
+  "createdTime" : 1772335766782,
+  "lastActivityTime" : 1772335766804,
+  "title" : "Conversation 1772335766782",
+  "messages" : [ {
+    "role" : "user",
+    "content" : "如何使用 Spring Boot 开发 REST API？",
+    "timestamp" : 1772335766803,
+    "messageId" : "5d70622f-156c-4051-869e-2254c3123b61"
+  }, {
+    "role" : "assistant",
+    "content" : "Failed to get response from LLM",
+    "timestamp" : 1772335766804,
+    "messageId" : "d9d3197a-ccb5-4c13-b7cd-a40753e3afb7"
+  } ],
+  "messageCount" : 2
+}

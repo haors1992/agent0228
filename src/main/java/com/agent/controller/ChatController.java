@@ -1,6 +1,7 @@
 package com.agent.controller;
 
 import com.agent.model.dto.ChatSession;
+import com.agent.model.dto.ConversationMessage;
 import com.agent.reasoning.engine.ExecutionContext;
 import com.agent.reasoning.engine.ReasoningEngine;
 import com.agent.service.SessionManager;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -62,8 +64,13 @@ public class ChatController {
             // 添加用户消息到历史
             session.addMessage("user", request.getQuery());
 
-            // Execute the agent reasoning
-            ExecutionContext context = reasoningEngine.execute(request.getQuery());
+            // 构建对话历史上下文
+            List<String> conversationHistory = session.getMessages().stream()
+                    .map(msg -> msg.getRole().toUpperCase() + ": " + msg.getContent())
+                    .collect(Collectors.toList());
+
+            // Execute the agent reasoning with conversation context
+            ExecutionContext context = reasoningEngine.execute(request.getQuery(), conversationHistory);
 
             // 添加助手回复到历史
             session.addMessage("assistant", context.getFinalAnswer());
@@ -132,10 +139,12 @@ public class ChatController {
     /**
      * Request body for chat endpoint
      * 支持 sessionId 用于多轮对话
+     * 支持 conversationHistory 用于提供上下文
      */
     public static class ChatRequest {
         private String query;
         private String sessionId;
+        private List<String> conversationHistory;
         private boolean includeDetails = false;
 
         public ChatRequest() {
@@ -172,6 +181,14 @@ public class ChatController {
             this.sessionId = sessionId;
         }
 
+        public List<String> getConversationHistory() {
+            return conversationHistory;
+        }
+
+        public void setConversationHistory(List<String> conversationHistory) {
+            this.conversationHistory = conversationHistory;
+        }
+
         public boolean isIncludeDetails() {
             return includeDetails;
         }
@@ -185,6 +202,7 @@ public class ChatController {
             return "ChatRequest{" +
                     "query='" + query + '\'' +
                     ", sessionId='" + sessionId + '\'' +
+                    ", conversationHistory=" + (conversationHistory != null ? conversationHistory.size() : 0) +
                     ", includeDetails=" + includeDetails +
                     '}';
         }

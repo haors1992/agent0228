@@ -52,7 +52,21 @@ public class ReasoningEngine {
      * @return ExecutionContext with the final answer and all intermediate steps
      */
     public ExecutionContext execute(String userQuery) {
+        return execute(userQuery, new ArrayList<>());
+    }
+
+    /**
+     * Execute the Agent's reasoning loop with conversation context
+     * 
+     * @param userQuery The user's question
+     * @param conversationHistory Previous conversation messages for context
+     * @return ExecutionContext with the final answer and all intermediate steps
+     */
+    public ExecutionContext execute(String userQuery, List<String> conversationHistory) {
         log.info("Starting agent reasoning for query: {}", userQuery);
+        if (conversationHistory != null && !conversationHistory.isEmpty()) {
+            log.info("📚 Including {} messages in conversation context", conversationHistory.size());
+        }
 
         ExecutionContext context = new ExecutionContext(userQuery);
         long startTime = System.currentTimeMillis();
@@ -67,6 +81,29 @@ public class ReasoningEngine {
                     .role("system")
                     .content(systemPrompt)
                     .build());
+
+            // Add conversation history for context
+            if (conversationHistory != null && !conversationHistory.isEmpty()) {
+                for (String history : conversationHistory) {
+                    // Parse role and content from formatted history (ROLE: content)
+                    if (history.contains(":")) {
+                        String[] parts = history.split(":", 2);
+                        String role = parts[0].trim().toLowerCase();
+                        String content = parts[1].trim();
+                        
+                        // Skip the current message if it's the latest user query
+                        if ("user".equals(role) && content.equals(userQuery)) {
+                            continue;
+                        }
+                        
+                        messages.add(Message.builder()
+                                .role(role)
+                                .content(content)
+                                .build());
+                    }
+                }
+                log.info("✅ Context loaded: {} previous messages added", messages.size() - 1);
+            }
 
             // Main reasoning loop
             for (int iteration = 0; iteration < maxIterations; iteration++) {
