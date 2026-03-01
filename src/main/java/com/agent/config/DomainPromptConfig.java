@@ -1,5 +1,6 @@
 package com.agent.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -8,9 +9,10 @@ import org.springframework.stereotype.Component;
  * 为不同专业领域提供定制化的系统提示
  * 增强 AI 代理在特定领域的专业性和准确性
  */
+@Slf4j
 @Component
 public class DomainPromptConfig {
-    
+
     /**
      * 医疗领域系统提示
      * 用于医学咨询、症状分析等
@@ -34,7 +36,7 @@ public class DomainPromptConfig {
                 "- Explain medical concepts clearly\n" +
                 "- Include appropriate disclaimers\n";
     }
-    
+
     /**
      * 法律咨询领域系统提示
      */
@@ -57,7 +59,7 @@ public class DomainPromptConfig {
                 "- Suggest when professional legal help is needed\n" +
                 "- Reference relevant laws or legal principles\n";
     }
-    
+
     /**
      * 编程开发领域系统提示
      */
@@ -87,7 +89,7 @@ public class DomainPromptConfig {
                 "- Reference relevant documentation\n" +
                 "- Discuss trade-offs and alternatives\n";
     }
-    
+
     /**
      * 财务投资领域系统提示
      */
@@ -112,7 +114,7 @@ public class DomainPromptConfig {
                 "- Note important considerations and associated risks\n" +
                 "- Suggest professional consultation for major financial decisions\n";
     }
-    
+
     /**
      * 科学教育领域系统提示
      */
@@ -141,7 +143,7 @@ public class DomainPromptConfig {
                 "- Provide visual descriptions or recommend diagrams\n" +
                 "- Explain the \"why\" not just the \"what\"\n";
     }
-    
+
     /**
      * 内容创作领域系统提示
      */
@@ -171,7 +173,7 @@ public class DomainPromptConfig {
                 "- Format for easy scanning and reading\n" +
                 "- Suggest variations and improvements\n";
     }
-    
+
     /**
      * 数据分析领域系统提示
      */
@@ -201,7 +203,7 @@ public class DomainPromptConfig {
                 "- Provide business implications\n" +
                 "- Suggest further analysis or data needed\n";
     }
-    
+
     /**
      * 通用领域（默认）
      */
@@ -219,7 +221,7 @@ public class DomainPromptConfig {
                 "- Consider context and nuance\n" +
                 "- Acknowledge limitations and uncertainties\n";
     }
-    
+
     /**
      * 根据关键词自动检测领域
      */
@@ -227,13 +229,15 @@ public class DomainPromptConfig {
         if (query == null) {
             return getGeneralPrompt();
         }
-        
+
         String lowerQuery = query.toLowerCase();
-        
+
         // 医疗关键词：扩展关键词列表以提高识别率
-        if (containsKeyword(lowerQuery, "医疗", "医生", "医院", "病", "症状", "疾病", "痛", "头痛", "药", "吃药", "健康", 
+        if (containsKeyword(lowerQuery, "医疗", "医生", "医院", "病", "症状", "疾病", "痛", "头痛", "药", "吃药", "健康",
                 "感到", "应该吃", "检查", "咳嗽", "发烧", "腹泻", "过敏", "感染", // 特定医疗问题短语
-                "medical", "doctor", "hospital", "disease", "symptom", "medicine", "health", "diagnos", "patient", "treatment", "pharmaceutical")) {
+                "medical", "doctor", "hospital", "disease", "symptom", "medicine", "health", "diagnos", "patient",
+                "treatment", "pharmaceutical")) {
+            log.info("🏥 Detected Medical Domain for query: {}", query);
             return getMedicalPrompt();
         }
         // 法律关键词
@@ -266,10 +270,10 @@ public class DomainPromptConfig {
                 "analytics", "data", "sql", "chart", "analysis")) {
             return getDataAnalyticsPrompt();
         }
-        
+
         return getGeneralPrompt();
     }
-    
+
     /**
      * 检查是否包含关键词
      */
