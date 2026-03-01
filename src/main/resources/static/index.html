@@ -23,12 +23,113 @@
         
         .container {
             width: 100%;
-            max-width: 900px;
+            max-width: 1400px;
             height: 90vh;
             max-height: 800px;
             background: white;
             border-radius: 15px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #1a252f;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 15px;
+            border-bottom: 1px solid #1a252f;
+            text-align: center;
+        }
+        
+        .sidebar-header h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .new-chat-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: transform 0.2s;
+        }
+        
+        .new-chat-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .sessions-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .session-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            font-size: 13px;
+        }
+        
+        .session-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .session-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 1px solid #667eea;
+        }
+        
+        .session-item-title {
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 5px;
+        }
+        
+        .session-item-meta {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+        
+        .session-item button {
+            display: none;
+            padding: 4px 8px;
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-top: 8px;
+            width: 100%;
+        }
+        
+        .session-item:hover button {
+            display: block;
+        }
+        
+        .main-content {
+            flex: 1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -37,19 +138,38 @@
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px;
-            text-align: center;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         
+        .header-title {
+            flex: 1;
+        }
+        
         .header h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
+            font-size: 20px;
+            margin-bottom: 3px;
         }
         
         .header p {
             font-size: 12px;
             opacity: 0.9;
+        }
+        
+        .session-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+        }
+        
+        .session-info-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
         }
         
         .chat-area {
@@ -332,43 +452,175 @@
         .chat-area::-webkit-scrollbar-thumb:hover {
             background: #764ba2;
         }
+
+        .history-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 350px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            flex-direction: column;
+            padding-top: 20px;
+        }
+
+        .history-panel.show {
+            display: flex;
+        }
+
+        .history-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .history-title {
+            padding: 0 20px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: bold;
+        }
+
+        .history-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 20px;
+        }
+
+        .history-message {
+            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            word-break: break-word;
+        }
+
+        .history-message.user {
+            background: #e3f2fd;
+            border-left: 3px solid #667eea;
+        }
+
+        .history-message.assistant {
+            background: #f5f5f5;
+            border-left: 3px solid #999;
+        }
+
+        .history-message-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            padding: 10px 20px;
+            border-top: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .toolbar button {
+            padding: 6px 12px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .toolbar button:hover {
+            background: #e0e0e0;
+        }
+
+        .toolbar button.danger {
+            background: #ffebee;
+            border-color: #d32f2f;
+            color: #d32f2f;
+        }
+
+        .toolbar button.danger:hover {
+            background: #ffcdd2;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🤖 AI Agent 对话助手</h1>
-            <p>由 DeepSeek API 驱动 | 支持自动任务执行</p>
+        <!-- 侧边栏：会话列表 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>📋 会话列表</h3>
+                <button class="new-chat-btn" onclick="createNewSession()">+ 新建会话</button>
+            </div>
+            <div class="sessions-list" id="sessionsList"></div>
         </div>
         
-        <div class="chat-area" id="chatArea">
-            <div class="empty-state">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                </svg>
-                <h2>开始对话</h2>
-                <p>尝试问我任何问题，例如计算、字符串处理等</p>
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <div class="header">
+                <div class="header-title">
+                    <h1>🤖 AI Agent</h1>
+                    <p>支持多轮持久化对话</p>
+                </div>
+                <div class="session-info">
+                    <span class="session-info-badge">
+                        📊 <span id="msgCount">0</span> 条消息
+                    </span>
+                    <span class="session-info-badge" id="sessionBadge" style="cursor: pointer;" onclick="toggleHistoryPanel()">
+                        📖 查看历史
+                    </span>
+                </div>
+            </div>
+            
+            <div class="chat-area" id="chatArea">
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <h2>开始对话</h2>
+                    <p>尝试问我任何问题，系统将自动保存对话历史</p>
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    placeholder="输入你的问题... (例如：计算 100 + 200)"
+                    autocomplete="off"
+                >
+                <button id="sendBtn" onclick="sendMessage()">发送</button>
             </div>
         </div>
-        
-        <div class="input-area">
-            <input 
-                type="text" 
-                id="messageInput" 
-                placeholder="输入你的问题... (例如：计算 100 + 200)"
-                autocomplete="off"
-            >
-            <button id="sendBtn" onclick="sendMessage()">发送</button>
+    </div>
+    
+    <!-- 历史面板 -->
+    <div class="history-panel" id="historyPanel">
+        <button class="history-close-btn" onclick="toggleHistoryPanel()">✕</button>
+        <div class="history-title">📜 对话历史</div>
+        <div class="history-content" id="historyContent"></div>
+        <div class="toolbar">
+            <button onclick="exportSession()">📥 导出</button>
+            <button onclick="clearSessionHistory()" class="danger">🗑️ 清空</button>
         </div>
     </div>
     
     <script>
+        let currentSessionId = null;
         const chatArea = document.getElementById('chatArea');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         let isLoading = false;
         
-        // 初始化
+        // ===== 初始化 =====
         function init() {
             messageInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && !isLoading) {
@@ -376,42 +628,187 @@
                 }
             });
             
-            // 检查后端是否在线
+            const savedSessionId = localStorage.getItem('currentSessionId');
+            if (savedSessionId) {
+                currentSessionId = savedSessionId;
+            }
+            
+            loadSessions();
             checkBackend();
         }
         
-        // 检查后端连接
-        function checkBackend() {
-            fetch('/api/agent/health')
-                .then(r => r.json())
-                .catch(() => {
-                    showError('⚠️ 后端服务未连接，请检查服务状态');
-                });
-        }
-        
-        // 清空空状态
-        function clearEmptyState() {
-            const emptyState = chatArea.querySelector('.empty-state');
-            if (emptyState) {
-                emptyState.remove();
+        // ===== 会话管理 =====
+        async function loadSessions() {
+            try {
+                const response = await fetch('/api/chat/history/sessions');
+                const data = await response.json();
+                
+                const sessionsList = document.getElementById('sessionsList');
+                sessionsList.innerHTML = '';
+                
+                if (data.sessions && data.sessions.length > 0) {
+                    data.sessions.forEach(session => {
+                        const sessionEl = createSessionElement(session);
+                        sessionsList.appendChild(sessionEl);
+                    });
+                    
+                    if (!currentSessionId && data.sessions.length > 0) {
+                        selectSession(data.sessions[0].sessionId);
+                    } else if (currentSessionId) {
+                        document.querySelectorAll('.session-item').forEach(el => {
+                            if (el.dataset.sessionId === currentSessionId) {
+                                el.classList.add('active');
+                            }
+                        });
+                        loadSessionMessages(currentSessionId);
+                    }
+                } else {
+                    createNewSession();
+                }
+            } catch (err) {
+                console.error('Failed to load sessions:', err);
             }
         }
         
-        // 发送消息
-        function sendMessage() {
+        function createSessionElement(session) {
+            const el = document.createElement('div');
+            el.className = 'session-item';
+            el.dataset.sessionId = session.sessionId;
+            
+            const title = session.title || '未命名会话';
+            const date = new Date(session.lastActivityTime).toLocaleDateString('zh-CN');
+            
+            el.innerHTML = `
+                <div class="session-item-title">${escapeHtml(title)}</div>
+                <div class="session-item-meta">
+                    💬 ${session.messageCount} 条消息 | 📅 ${date}
+                </div>
+                <button onclick="event.stopPropagation(); deleteSession('${session.sessionId}')">删除</button>
+            `;
+            
+            el.onclick = () => {
+                selectSession(session.sessionId);
+            };
+            
+            return el;
+        }
+        
+        async function selectSession(sessionId) {
+            currentSessionId = sessionId;
+            localStorage.setItem('currentSessionId', sessionId);
+            
+            document.querySelectorAll('.session-item').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelector(`[data-sessionId="${sessionId}"]`)?.classList.add('active');
+            
+            loadSessionMessages(sessionId);
+            clearEmptyState();
+        }
+        
+        async function loadSessionMessages(sessionId) {
+            try {
+                const response = await fetch(`/api/chat/history/sessions/${sessionId}`);
+                const data = await response.json();
+                
+                chatArea.innerHTML = '';
+                
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(msg => {
+                        addExistingMessage(msg.content, msg.role);
+                    });
+                } else {
+                    chatArea.innerHTML = `
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <h2>开始对话</h2>
+                            <p>在此会话中没有消息，尝试发送一个问题</p>
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('msgCount').textContent = data.messageCount || 0;
+                scrollToBottom();
+            } catch (err) {
+                console.error('Failed to load messages:', err);
+            }
+        }
+        
+        async function createNewSession() {
+            const title = prompt('请输入会话标题：', '新建会话');
+            if (!title) return;
+            
+            try {
+                const response = await fetch('/api/chat/history/sessions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title })
+                });
+                
+                const data = await response.json();
+                currentSessionId = data.sessionId;
+                localStorage.setItem('currentSessionId', data.sessionId);
+                
+                loadSessions();
+                
+                chatArea.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <h2>开始对话</h2>
+                        <p>尝试问我任何问题，系统将自动保存对话历史</p>
+                    </div>
+                `;
+                document.getElementById('msgCount').textContent = '0';
+            } catch (err) {
+                console.error('Failed to create session:', err);
+                alert('创建会话失败');
+            }
+        }
+        
+        async function deleteSession(sessionId) {
+            if (!confirm('确定要删除这个会话吗？此操作不可撤销。')) {
+                return;
+            }
+            
+            try {
+                await fetch(`/api/chat/history/sessions/${sessionId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (currentSessionId === sessionId) {
+                    currentSessionId = null;
+                    localStorage.removeItem('currentSessionId');
+                }
+                
+                loadSessions();
+            } catch (err) {
+                console.error('Failed to delete session:', err);
+                alert('删除失败');
+            }
+        }
+        
+        // ===== 消息发送和显示 =====
+        async function sendMessage() {
             const message = messageInput.value.trim();
             if (!message || isLoading) return;
             
+            if (!currentSessionId) {
+                alert('请先创建或选择一个会话');
+                return;
+            }
+            
             clearEmptyState();
             
-            // 显示用户消息
             addMessage(message, 'user');
             messageInput.value = '';
             messageInput.disabled = true;
             sendBtn.disabled = true;
             isLoading = true;
             
-            // 显示加载指示
             const loadingElement = document.createElement('div');
             loadingElement.className = 'message assistant';
             loadingElement.innerHTML = `
@@ -427,45 +824,39 @@
             chatArea.appendChild(loadingElement);
             scrollToBottom();
             
-            // 发送到后端
-            fetch('/api/agent/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    query: message,
-                    includeDetails: true
-                })
-            })
-            .then(r => {
-                if (!r.ok) throw new Error('请求失败: ' + r.status);
-                return r.json();
-            })
-            .then(data => {
-                // 移除加载指示
+            try {
+                const response = await fetch('/api/agent/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: message,
+                        sessionId: currentSessionId,
+                        includeDetails: true
+                    })
+                });
+                
+                if (!response.ok) throw new Error('请求失败: ' + response.status);
+                const data = await response.json();
+                
                 loadingElement.remove();
                 
-                // 显示结果
                 if (data.result) {
                     addMessage(data.result, 'assistant', data);
+                    document.getElementById('msgCount').textContent = data.messageCount || 0;
                 } else {
                     showError('未获取到结果');
                 }
-            })
-            .catch(err => {
+            } catch (err) {
                 loadingElement.remove();
                 showError('错误: ' + err.message);
-            })
-            .finally(() => {
+            } finally {
                 messageInput.disabled = false;
                 sendBtn.disabled = false;
                 isLoading = false;
                 messageInput.focus();
-            });
+            }
         }
         
-        // 添加消息到聊天区域
         function addMessage(content, role, data = null) {
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${role}`;
@@ -476,7 +867,6 @@
             
             msgDiv.appendChild(contentDiv);
             
-            // 添加元数据和详细信息
             if (role === 'assistant' && data) {
                 const metaDiv = document.createElement('div');
                 metaDiv.className = 'message-meta';
@@ -487,7 +877,6 @@
                 `;
                 msgDiv.appendChild(metaDiv);
                 
-                // 显示详细步骤
                 if (data.steps && data.steps.length > 0) {
                     const detailsDiv = document.createElement('div');
                     detailsDiv.className = 'details steps-section';
@@ -506,13 +895,12 @@
                     msgDiv.appendChild(detailsDiv);
                 }
                 
-                // 显示工具调用结果
                 if (data.tool_results && data.tool_results.length > 0) {
                     const toolsDiv = document.createElement('div');
                     toolsDiv.className = 'details steps-section';
                     
                     let toolsHTML = '<div class="details-title">🔧 工具调用</div>';
-                    data.tool_results.forEach((tool, idx) => {
+                    data.tool_results.forEach((tool) => {
                         toolsHTML += `
                             <div class="step-item">
                                 <div class="step-label">
@@ -536,7 +924,120 @@
             scrollToBottom();
         }
         
-        // 显示错误信息
+        function addExistingMessage(content, role) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${role}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            
+            msgDiv.appendChild(contentDiv);
+            chatArea.appendChild(msgDiv);
+        }
+        
+        // ===== 历史面板 =====
+        function toggleHistoryPanel() {
+            const panel = document.getElementById('historyPanel');
+            panel.classList.toggle('show');
+            
+            if (panel.classList.contains('show')) {
+                loadHistoryPanel();
+            }
+        }
+        
+        async function loadHistoryPanel() {
+            if (!currentSessionId) return;
+            
+            try {
+                const response = await fetch(`/api/chat/history/sessions/${currentSessionId}`);
+                const data = await response.json();
+                
+                const historyContent = document.getElementById('historyContent');
+                historyContent.innerHTML = '';
+                
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(msg => {
+                        const msgEl = document.createElement('div');
+                        msgEl.className = `history-message ${msg.role}`;
+                        msgEl.innerHTML = `
+                            <div class="history-message-label">${msg.role === 'user' ? '👤 你' : '🤖 助手'}</div>
+                            <div>${escapeHtml(msg.content)}</div>
+                        `;
+                        historyContent.appendChild(msgEl);
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to load history:', err);
+            }
+        }
+        
+        async function exportSession() {
+            if (!currentSessionId) return;
+            
+            try {
+                const response = await fetch(`/api/chat/history/sessions/${currentSessionId}/export`);
+                const data = await response.json();
+                
+                const jsonStr = JSON.stringify(data, null, 2);
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `session-${currentSessionId}-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error('Failed to export:', err);
+                alert('导出失败');
+            }
+        }
+        
+        async function clearSessionHistory() {
+            if (!confirm('确定要清空所有消息吗？此操作不可撤销。')) {
+                return;
+            }
+            
+            try {
+                await fetch(`/api/chat/history/sessions/${currentSessionId}/messages`, {
+                    method: 'DELETE'
+                });
+                
+                chatArea.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <h2>开始对话</h2>
+                        <p>历史已清空，尝试发送一个新问题</p>
+                    </div>
+                `;
+                document.getElementById('msgCount').textContent = '0';
+                loadHistoryPanel();
+            } catch (err) {
+                console.error('Failed to clear history:', err);
+                alert('清空失败');
+            }
+        }
+        
+        // ===== 工具函数 =====
+        function checkBackend() {
+            fetch('/api/agent/health')
+                .then(r => r.json())
+                .catch(() => {
+                    showError('⚠️ 后端服务未连接，请检查服务状态');
+                });
+        }
+        
+        function clearEmptyState() {
+            const emptyState = chatArea.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+        }
+        
         function showError(message) {
             const errorDiv = document.createElement('div');
             errorDiv.className = 'error';
@@ -550,14 +1051,12 @@
             scrollToBottom();
         }
         
-        // 滚动到底部
         function scrollToBottom() {
             setTimeout(() => {
                 chatArea.scrollTop = chatArea.scrollHeight;
             }, 0);
         }
         
-        // HTML 转义
         function escapeHtml(text) {
             const map = {
                 '&': '&amp;',
