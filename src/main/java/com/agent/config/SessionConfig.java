@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 @Configuration
 public class SessionConfig {
-    
+
     /**
      * 应用启动时初始化会话管理器
      */

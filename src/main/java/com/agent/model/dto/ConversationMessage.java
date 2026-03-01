@@ -13,16 +13,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConversationMessage {
-    
+
     /** 消息角色：user 或 assistant */
     private String role;
-    
+
     /** 消息内容 */
     private String content;
-    
+
     /** 时间戳（毫秒） */
     private long timestamp;
-    
+
     /** 消息ID（用于删除特定消息） */
     private String messageId;
 }

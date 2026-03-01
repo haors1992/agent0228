@@ -18,13 +18,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/chat/history")
 public class ChatHistoryController {
-    
+
     private final SessionManager sessionManager;
-    
+
     public ChatHistoryController(SessionManager sessionManager) {
         this.sessionManager = sessionManager;
     }
-    
+
     /**
      * 获取会话列表
      * GET /api/chat/history/sessions
@@ -37,7 +37,7 @@ public class ChatHistoryController {
         response.put("sessions", sessions);
         return response;
     }
-    
+
     /**
      * 获取指定会话的对话历史
      * GET /api/chat/history/sessions/{sessionId}
@@ -45,7 +45,7 @@ public class ChatHistoryController {
     @GetMapping("/sessions/{sessionId}")
     public Map<String, Object> getSessionHistory(@PathVariable String sessionId) {
         ChatSession session = sessionManager.getOrCreateSession(sessionId);
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("sessionId", session.getSessionId());
         response.put("title", session.getTitle());
@@ -53,10 +53,10 @@ public class ChatHistoryController {
         response.put("lastActivityTime", session.getLastActivityTime());
         response.put("messageCount", session.getMessageCount());
         response.put("messages", session.getMessages());
-        
+
         return response;
     }
-    
+
     /**
      * 创建新会话
      * POST /api/chat/history/sessions
@@ -68,14 +68,14 @@ public class ChatHistoryController {
             session.setTitle(title);
         }
         sessionManager.saveSession(session);
-        
+
         Map<String, String> response = new HashMap<>();
         response.put("sessionId", session.getSessionId());
         response.put("title", session.getTitle());
         response.put("message", "✅ Session created successfully");
         return response;
     }
-    
+
     /**
      * 删除指定会话
      * DELETE /api/chat/history/sessions/{sessionId}
@@ -83,7 +83,7 @@ public class ChatHistoryController {
     @DeleteMapping("/sessions/{sessionId}")
     public Map<String, String> deleteSession(@PathVariable String sessionId) {
         boolean success = sessionManager.deleteSession(sessionId);
-        
+
         Map<String, String> response = new HashMap<>();
         if (success) {
             response.put("message", "✅ Session deleted successfully");
@@ -94,7 +94,7 @@ public class ChatHistoryController {
         }
         return response;
     }
-    
+
     /**
      * 清空指定会话的消息
      * DELETE /api/chat/history/sessions/{sessionId}/messages
@@ -104,13 +104,13 @@ public class ChatHistoryController {
         ChatSession session = sessionManager.getOrCreateSession(sessionId);
         session.clearMessages();
         sessionManager.saveSession(session);
-        
+
         Map<String, String> response = new HashMap<>();
         response.put("message", "✅ Session messages cleared");
         response.put("sessionId", sessionId);
         return response;
     }
-    
+
     /**
      * 删除单条消息
      * DELETE /api/chat/history/sessions/{sessionId}/messages/{messageId}
@@ -119,11 +119,11 @@ public class ChatHistoryController {
     public Map<String, Object> deleteMessage(
             @PathVariable String sessionId,
             @PathVariable String messageId) {
-        
+
         ChatSession session = sessionManager.getOrCreateSession(sessionId);
         boolean success = session.removeMessage(messageId);
         sessionManager.saveSession(session);
-        
+
         Map<String, Object> response = new HashMap<>();
         if (success) {
             response.put("message", "✅ Message deleted successfully");
@@ -137,7 +137,7 @@ public class ChatHistoryController {
         }
         return response;
     }
-    
+
     /**
      * 导出会话为 JSON
      * GET /api/chat/history/sessions/{sessionId}/export
@@ -146,7 +146,7 @@ public class ChatHistoryController {
     public ChatSession exportSession(@PathVariable String sessionId) {
         return sessionManager.getOrCreateSession(sessionId);
     }
-    
+
     /**
      * 获取统计信息
      * GET /api/chat/history/stats
@@ -154,20 +154,20 @@ public class ChatHistoryController {
     @GetMapping("/stats")
     public Map<String, Object> getStats() {
         List<ChatSession> sessions = sessionManager.getAllSessions();
-        
+
         int totalMessages = 0;
         int totalSessions = sessions.size();
-        
+
         for (ChatSession session : sessions) {
             totalMessages += session.getMessageCount();
         }
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("totalSessions", totalSessions);
         response.put("totalMessages", totalMessages);
-        response.put("averageMessagesPerSession", 
-            totalSessions > 0 ? (double) totalMessages / totalSessions : 0);
-        
+        response.put("averageMessagesPerSession",
+                totalSessions > 0 ? (double) totalMessages / totalSessions : 0);
+
         return response;
     }
 }

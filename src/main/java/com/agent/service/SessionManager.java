@@ -19,13 +19,13 @@ import java.util.*;
 @Slf4j
 @Component
 public class SessionManager {
-    
+
     @Value("${agent.session.storage-path:./data/sessions}")
     private String storagePath;
-    
+
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Map<String, ChatSession> sessionCache = new HashMap<>();
-    
+
     /**
      * 初始化存储目录
      */
@@ -39,7 +39,7 @@ public class SessionManager {
         }
         loadAllSessions();
     }
-    
+
     /**
      * 获取或创建会话
      */
@@ -48,7 +48,7 @@ public class SessionManager {
         if (sessionCache.containsKey(sessionId)) {
             return sessionCache.get(sessionId);
         }
-        
+
         // 从文件加载
         ChatSession session = loadSession(sessionId);
         if (session == null) {
@@ -59,11 +59,11 @@ public class SessionManager {
             }
             log.info("📝 Created new session: {}", session.getSessionId());
         }
-        
+
         sessionCache.put(session.getSessionId(), session);
         return session;
     }
-    
+
     /**
      * 保存会话
      */
@@ -77,7 +77,7 @@ public class SessionManager {
             log.error("❌ Failed to save session: {}", session.getSessionId(), e);
         }
     }
-    
+
     /**
      * 从文件加载会话
      */
@@ -94,7 +94,7 @@ public class SessionManager {
         }
         return null;
     }
-    
+
     /**
      * 加载所有会话到缓存
      */
@@ -103,7 +103,7 @@ public class SessionManager {
         if (!dir.exists()) {
             return;
         }
-        
+
         File[] files = dir.listFiles((d, name) -> name.endsWith(".json"));
         if (files != null) {
             for (File file : files) {
@@ -118,7 +118,7 @@ public class SessionManager {
         }
         log.info("✅ Loaded {} sessions from storage", sessionCache.size());
     }
-    
+
     /**
      * 删除会话
      */
@@ -138,21 +138,21 @@ public class SessionManager {
         }
         return false;
     }
-    
+
     /**
      * 获取所有会话列表
      */
     public List<ChatSession> getAllSessions() {
         return new ArrayList<>(sessionCache.values());
     }
-    
+
     /**
      * 获取会话总数
      */
     public int getSessionCount() {
         return sessionCache.size();
     }
-    
+
     /**
      * 清空所有会话
      */

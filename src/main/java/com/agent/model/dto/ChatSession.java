@@ -17,25 +17,25 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatSession {
-    
+
     /** 会话 ID - 唯一标识 */
     private String sessionId;
-    
+
     /** 会话创建时间 */
     private long createdTime;
-    
+
     /** 最后活动时间 */
     private long lastActivityTime;
-    
+
     /** 会话标题（可选） */
     private String title;
-    
+
     /** 对话消息列表 */
     private List<ConversationMessage> messages;
-    
+
     /** 元数据：对话轮次 */
     private int messageCount;
-    
+
     /**
      * 创建新会话
      */
@@ -49,7 +49,7 @@ public class ChatSession {
                 .messageCount(0)
                 .build();
     }
-    
+
     /**
      * 添加消息
      */
@@ -60,12 +60,12 @@ public class ChatSession {
                 .timestamp(System.currentTimeMillis())
                 .messageId(UUID.randomUUID().toString())
                 .build();
-        
+
         this.messages.add(msg);
         this.messageCount++;
         this.lastActivityTime = System.currentTimeMillis();
     }
-    
+
     /**
      * 删除单条消息
      */
@@ -77,7 +77,7 @@ public class ChatSession {
         }
         return removed;
     }
-    
+
     /**
      * 清空消息
      */
