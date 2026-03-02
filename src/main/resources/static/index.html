@@ -143,6 +143,7 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            gap: 20px;
         }
         
         .header-title {
@@ -550,6 +551,58 @@
         .toolbar button.danger:hover {
             background: #ffcdd2;
         }
+
+        .sidebar-footer {
+            padding: 10px;
+            border-top: 1px solid #1a252f;
+        }
+
+        .kb-link {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 13px;
+            transition: transform 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .kb-link:hover {
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: white;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .kb-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .kb-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -561,6 +614,11 @@
                 <button class="new-chat-btn" onclick="createNewSession()">+ 新建会话</button>
             </div>
             <div class="sessions-list" id="sessionsList"></div>
+            <div class="sidebar-footer">
+                <a href="/knowledge-base.html" class="kb-link">📚 知识库管理</a>
+                <a href="/streaming-test.html" class="kb-link" style="margin-top: 8px;">🔄 流式测试</a>
+                <a href="/monitoring-dashboard.html" class="kb-link" style="margin-top: 8px;">📈 监控仪表</a>
+            </div>
         </div>
         
         <!-- 主内容区 -->
@@ -570,13 +628,18 @@
                     <h1>🤖 AI Agent</h1>
                     <p>支持多轮持久化对话</p>
                 </div>
-                <div class="session-info">
-                    <span class="session-info-badge">
-                        📊 <span id="msgCount">0</span> 条消息
-                    </span>
-                    <span class="session-info-badge" id="sessionBadge" style="cursor: pointer;" onclick="toggleHistoryPanel()">
-                        📖 查看历史
-                    </span>
+                <div class="header-buttons">
+                    <a href="/knowledge-base.html" class="kb-btn">📚 知识库</a>
+                    <a href="/streaming-test.html" class="kb-btn">🔄 流式测试</a>
+                    <a href="/monitoring-dashboard.html" class="kb-btn">📈 监控</a>
+                    <div class="session-info">
+                        <span class="session-info-badge">
+                            📊 <span id="msgCount">0</span> 条消息
+                        </span>
+                        <span class="session-info-badge" id="sessionBadge" style="cursor: pointer;" onclick="toggleHistoryPanel()">
+                            📖 查看历史
+                        </span>
+                    </div>
                 </div>
             </div>
             
