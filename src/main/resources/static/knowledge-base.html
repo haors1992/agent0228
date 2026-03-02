@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 知识库管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 顶部导航栏 */
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* 主容器分两列 */
+        .main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            margin-right: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-danger:hover {
+            background: #ff5252;
+        }
+
+        /* 搜索栏 */
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-bar input {
+            flex: 1;
+        }
+
+        .search-bar button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* 文档列表 */
+        .document-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .document-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .document-item:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        .document-item h3 {
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .document-item p {
+            color: #666;
+            font-size: 12px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .document-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #667eea;
+            color: white;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge.secondary {
+            background: #999;
+        }
+
+        .document-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        /* 发送请求结果 */
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .message.success {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            color: #2e7d32;
+        }
+
+        .message.error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            color: #c62828;
+        }
+
+        .message.info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            color: #1565c0;
+        }
+
+        /* 滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5568d3;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .stats {
+                justify-content: space-around;
+                width: 100%;
+            }
+        }
+
+        /* 标签栏 */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #999;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部 -->
+        <div class="header">
+            <h1>📚 知识库管理系统</h1>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalDocs">0</div>
+                    <div class="stat-label">总文档数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalChars">0</div>
+                    <div class="stat-label">总字符数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalCategories">0</div>
+                    <div class="stat-label">分类数</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main">
+            <!-- 左侧：添加/编辑文档 -->
+            <div class="card">
+                <h2>➕ 添加新文档</h2>
+                <div id="addMessage"></div>
+
+                <div class="form-group">
+                    <label>文档标题 *</label>
+                    <input type="text" id="docTitle" placeholder="例如：房产交易流程">
+                </div>
+
+                <div class="form-group">
+                    <label>文档内容 *</label>
+                    <textarea id="docContent" placeholder="输入完整的文档内容，支持 markdown 格式..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>分类</label>
+                    <input type="text" id="docCategory" placeholder="例如：房产知识、对话技巧">
+                </div>
+
+                <div class="form-group">
+                    <label>来源</label>
+                    <input type="text" id="docSource" placeholder="例如：公司培训、行业标准">
+                </div>
+
+                <button class="btn btn-primary" onclick="addDocument()">
+                    <span id="addBtnText">添加文档</span>
+                </button>
+            </div>
+
+            <!-- 右侧：文档列表与搜索 -->
+            <div class="card">
+                <h2>📄 文档列表</h2>
+
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="搜索文档...">
+                    <button onclick="searchDocuments()">搜索</button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('all')">全部</button>
+                    <button class="tab" onclick="switchTab('category')">按分类</button>
+                </div>
+
+                <div id="categoryFilter" style="margin-bottom: 15px; display: none;">
+                    <select id="categorySelect" onchange="filterByCategory()">
+                        <option value="">选择分类...</option>
+                    </select>
+                </div>
+
+                <div id="documentsList" class="document-list">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📚</div>
+                        <p>暂无文档，请先添加文档</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div id="detailModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 600px; max-height: 80vh; border-radius: 12px; padding: 20px; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 id="detailTitle" style="color: #333;"></h2>
+                <button onclick="closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">✕</button>
+            </div>
+            <div id="detailContent" style="color: #666; line-height: 1.8; margin-bottom: 15px;"></div>
+            <div id="detailMeta" style="color: #999; font-size: 12px; border-top: 1px solid #eee; padding-top: 10px;"></div>
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button id="deleteBtn" class="btn btn-danger" onclick="deleteDocumentConfirm()">删除</button>
+                <button class="btn btn-secondary" onclick="closeModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDocId = null;
+        let allDocuments = [];
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            loadDocuments();
+            setInterval(loadStats, 10000); // 每10秒刷新一次统计
+        });
+
+        // 加载统计数据
+        function loadStats() {
+            fetch('/api/knowledge/stats')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.stats) {
+                        document.getElementById('totalDocs').textContent = data.stats.totalDocuments || 0;
+                        document.getElementById('totalChars').textContent = formatNumber(data.stats.totalCharacters || 0);
+                        document.getElementById('totalCategories').textContent = data.stats.categories || 0;
+                    }
+                })
+                .catch(err => console.error('Failed to load stats:', err));
+        }
+
+        // 加载文档列表
+        function loadDocuments() {
+            fetch('/api/knowledge/documents')
+                .then(res => res.json())
+                .then(data => {
+                    allDocuments = data.documents || [];
+                    renderDocuments(allDocuments);
+                    updateCategoryFilter();
+                })
+                .catch(err => {
+                    showMessage('加载文档失败: ' + err, 'error');
+                });
+        }
+
+        // 渲染文档列表
+        function renderDocuments(documents) {
+            const container = document.getElementById('documentsList');
+            
+            if (documents.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📚</div>
+                        <p>暂无文档</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = documents.map(doc => `
+                <div class="document-item">
+                    <h3>${escapeHtml(doc.title || '无标题')}</h3>
+                    <p>${escapeHtml(doc.content.substring(0, 100))}${doc.content.length > 100 ? '...' : ''}</p>
+                    <div class="document-meta">
+                        <span>🆔 ${doc.docId.substring(0, 8)}</span>
+                        ${doc.category ? `<span class="badge">${escapeHtml(doc.category)}</span>` : ''}
+                        ${doc.source ? `<span class="badge secondary">📍 ${escapeHtml(doc.source)}</span>` : ''}
+                        <span>📅 ${new Date(doc.timestamp).toLocaleDateString('zh-CN')}</span>
+                    </div>
+                    <div class="document-actions">
+                        <button class="btn btn-secondary" onclick="viewDetail('${doc.docId}')" style="flex: 1; padding: 6px 12px; font-size: 12px;">查看详情</button>
+                        <button class="btn btn-danger" onclick="deleteDocument('${doc.docId}')">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 添加文档
+        function addDocument() {
+            const title = document.getElementById('docTitle').value.trim();
+            const content = document.getElementById('docContent').value.trim();
+            const category = document.getElementById('docCategory').value.trim();
+            const source = document.getElementById('docSource').value.trim();
+
+            if (!title || !content) {
+                showMessage('❌ 标题和内容不能为空', 'error');
+                return;
+            }
+
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span>上传中...';
+
+            fetch('/api/knowledge/documents', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title,
+                    content,
+                    category: category || 'general',
+                    source
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.docId) {
+                    showMessage('✅ 文档添加成功！', 'success');
+                    // 清空表单
+                    document.getElementById('docTitle').value = '';
+                    document.getElementById('docContent').value = '';
+                    document.getElementById('docCategory').value = '';
+                    document.getElementById('docSource').value = '';
+                    // 刷新列表
+                    loadDocuments();
+                    loadStats();
+                } else {
+                    showMessage('❌ ' + (data.error || '添加失败'), 'error');
+                }
+            })
+            .catch(err => showMessage('❌ 请求失败: ' + err, 'error'))
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '添加文档';
+            });
+        }
+
+        // 删除文档
+        function deleteDocument(docId) {
+            if (!confirm('确定要删除这个文档吗？')) return;
+
+            fetch(`/api/knowledge/documents/${docId}`, { method: 'DELETE' })
+                .then(res => res.json())
+                .then(data => {
+                    showMessage('✅ 文档已删除', 'success');
+                    loadDocuments();
+                    loadStats();
+                })
+                .catch(err => showMessage('❌ 删除失败: ' + err, 'error'));
+        }
+
+        // 删除确认
+        function deleteDocumentConfirm() {
+            if (currentDocId && confirm('确定要删除这个文档吗？')) {
+                deleteDocument(currentDocId);
+                closeModal();
+            }
+        }
+
+        // 查看详情
+        function viewDetail(docId) {
+            const doc = allDocuments.find(d => d.docId === docId);
+            if (!doc) return;
+
+            currentDocId = docId;
+            document.getElementById('detailTitle').textContent = doc.title;
+            document.getElementById('detailContent').textContent = doc.content;
+            document.getElementById('detailMeta').innerHTML = `
+                <p>分类: ${doc.category || '未分类'}</p>
+                <p>来源: ${doc.source || '未指定'}</p>
+                <p>创建时间: ${new Date(doc.timestamp).toLocaleString('zh-CN')}</p>
+                <p>文档ID: ${doc.docId}</p>
+            `;
+            document.getElementById('detailModal').style.display = 'block';
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+            currentDocId = null;
+        }
+
+        // 搜索文档
+        function searchDocuments() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query.length < 2) {
+                showMessage('💡 请输入至少2个字符', 'info');
+                return;
+            }
+
+            const filtered = allDocuments.filter(doc =>
+                doc.title.includes(query) || doc.content.includes(query)
+            );
+
+            renderDocuments(filtered);
+        }
+
+        // 更新分类过滤器
+        function updateCategoryFilter() {
+            const categories = [...new Set(allDocuments.map(d => d.category).filter(Boolean))];
+            const select = document.getElementById('categorySelect');
+            select.innerHTML = '<option value="">选择分类...</option>' +
+                categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        }
+
+        // 按分类过滤
+        function filterByCategory() {
+            const category = document.getElementById('categorySelect').value;
+            if (!category) {
+                renderDocuments(allDocuments);
+            } else {
+                renderDocuments(allDocuments.filter(d => d.category === category));
+            }
+        }
+
+        // 切换标签页
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const filter = document.getElementById('categoryFilter');
+            if (tab === 'category') {
+                filter.style.display = 'block';
+            } else {
+                filter.style.display = 'none';
+                renderDocuments(allDocuments);
+            }
+        }
+
+        // 显示消息
+        function showMessage(text, type) {
+            const container = document.getElementById('addMessage');
+            container.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+
+        // 工具函数
+        function formatNumber(num) {
+            return num.toLocaleString('zh-CN');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 回车键搜索
+        document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchDocuments();
+        });
+
+        // 点击外部关闭弹窗
+        document.getElementById('detailModal')?.addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+</body>
+</html>
