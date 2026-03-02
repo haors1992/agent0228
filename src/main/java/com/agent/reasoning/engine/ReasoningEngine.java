@@ -249,7 +249,7 @@ public class ReasoningEngine {
             return response;
         } catch (Exception e) {
             log.error("Error calling LLM: {}", e.getMessage(), e);
-            return null;
+            throw new RuntimeException("LLM call failed: " + e.getMessage(), e);
         }
     }
 

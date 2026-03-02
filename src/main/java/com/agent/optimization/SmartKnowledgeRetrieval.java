@@ -1,7 +1,9 @@
 package com.agent.optimization;
 
+import com.agent.knowledge.service.KnowledgeBaseManager;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -19,6 +21,9 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class SmartKnowledgeRetrieval {
+
+    @Autowired(required = false)
+    private KnowledgeBaseManager knowledgeBaseManager;
 
     // 检索配置
     private static final int INITIAL_TOP_K = 10; // 初始候选集大小
@@ -163,15 +168,43 @@ public class SmartKnowledgeRetrieval {
     }
 
     /**
-     * 模拟语义搜索（实际应集成向量数据库）
+     * 执行语义搜索（调用实际的KnowledgeBaseManager）
      */
     private List<Document> performSemanticSearch(String query, int topK) {
-        // 这里应该调用实际的向量数据库或搜索服务
-        // 模拟实现：返回空列表
         List<Document> results = new ArrayList<>();
 
-        log.debug("🔎 Semantic search would retrieve {} documents for: '{}'",
-                topK, query);
+        // 检查知识库是否可用
+        if (knowledgeBaseManager == null) {
+            log.warn("⚠️ KnowledgeBaseManager not available, returning empty results");
+            return results;
+        }
+
+        try {
+            // 调用真实的知识库语义搜索
+            List<KnowledgeBaseManager.SearchResult> kbResults = knowledgeBaseManager.semanticSearch(query, topK);
+
+            log.debug("🔎 Semantic search retrieved {} documents for: '{}'",
+                    kbResults.size(), query);
+
+            // 转换为Document对象
+            for (KnowledgeBaseManager.SearchResult kbResult : kbResults) {
+                Document doc = new Document(
+                        kbResult.getDocId(),
+                        kbResult.getTitle(),
+                        kbResult.getContent());
+                doc.setSimilarity(kbResult.getSimilarity());
+                doc.setSource("knowledge_base");
+                if (kbResult.getSummary() != null) {
+                    doc.setSummary(kbResult.getSummary());
+                }
+                results.add(doc);
+            }
+
+            log.info("✅ Converted {} KB results to Document objects", results.size());
+
+        } catch (Exception e) {
+            log.error("❌ Error during semantic search: {}", e.getMessage(), e);
+        }
 
         return results;
     }
