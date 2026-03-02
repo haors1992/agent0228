@@ -5,9 +5,12 @@ import com.agent.model.dto.ConversationMessage;
 import com.agent.reasoning.engine.ExecutionContext;
 import com.agent.reasoning.engine.ReasoningEngine;
 import com.agent.service.SessionManager;
+import com.agent.streaming.StreamingResponseHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -124,6 +127,124 @@ public class ChatController {
             errorResponse.put("error", "Internal server error: " + e.getMessage());
             return ResponseEntity.internalServerError().body(errorResponse);
         }
+    }
+
+    /**
+     * 流式响应端点 - Server-Sent Events (SSE)
+     * 实时流式传输 AI 响应
+     * 
+     * @param request 用户查询和会话 ID
+     * @return SSE 流式响应，消息实时推送给客户端
+     */
+    @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter chatStream(@RequestBody ChatRequest request) {
+        SseEmitter emitter = new SseEmitter(300000L); // 5分钟超时
+        StreamingResponseHandler handler = new StreamingResponseHandler(emitter);
+
+        // 在后台线程中异步处理请求
+        handler.executeAsync(() -> {
+            try {
+                if (request.getQuery() == null || request.getQuery().trim().isEmpty()) {
+                    handler.sendError("Query cannot be empty");
+                    try {
+                        handler.close();
+                    } catch (Exception e) {
+                        log.error("❌ Error closing handler", e);
+                    }
+                    return;
+                }
+
+                log.info("🔄 Received streaming chat request: {}", request.getQuery());
+
+                // 获取或创建会话
+                String sessionId = request.getSessionId();
+                if (sessionId == null || sessionId.isEmpty()) {
+                    sessionId = UUID.randomUUID().toString();
+                }
+                ChatSession session = sessionManager.getOrCreateSession(sessionId);
+
+                long startTime = System.currentTimeMillis();
+
+                // 添加用户消息到历史
+                session.addMessage("user", request.getQuery());
+
+                // 发送会话 ID
+                Map<String, String> sessionInfo = new HashMap<>();
+                sessionInfo.put("sessionId", sessionId);
+                handler.sendChunk("Session: " + sessionId + "\n");
+
+                // 构建对话历史上下文
+                List<String> conversationHistory = session.getMessages().stream()
+                        .map(msg -> msg.getRole().toUpperCase() + ": " + msg.getContent())
+                        .collect(Collectors.toList());
+
+                // 发送开始信息
+                handler.sendChunk("🤔 Reasoning...\n");
+
+                // 执行推理引擎（可以逐步发送步骤信息）
+                ExecutionContext context = reasoningEngine.execute(request.getQuery(), conversationHistory);
+
+                // 发送逐个单词的流式响应
+                String finalAnswer = context.getFinalAnswer();
+                handler.sendChunk("\n📝 Response:\n");
+
+                // 模拟流式传输：按句子分割返回
+                String[] sentences = finalAnswer.split("(?<=[。！？；])|(?<=[.!?;])");
+                for (String sentence : sentences) {
+                    if (handler.isActive() && !sentence.trim().isEmpty()) {
+                        handler.sendChunk(sentence.trim() + " ");
+                        // 模拟延迟，使流式传输更明显
+                        Thread.sleep(50);
+                    }
+                }
+
+                // 添加助手回复到历史
+                session.addMessage("assistant", finalAnswer);
+
+                // 保存会话
+                sessionManager.saveSession(session);
+
+                long duration = System.currentTimeMillis() - startTime;
+
+                // 构建最终结果
+                Map<String, Object> finalResult = new HashMap<>();
+                finalResult.put("sessionId", sessionId);
+                finalResult.put("messageCount", session.getMessageCount());
+                finalResult.put("duration_ms", duration);
+                finalResult.put("iterations", context.getCurrentIteration());
+                finalResult.put("is_complete", context.getIsComplete());
+
+                // 如果请求了详细信息
+                if (request.isIncludeDetails()) {
+                    finalResult.put("steps", context.getThoughtActions().stream()
+                            .map(ta -> {
+                                Map<String, Object> step = new HashMap<>();
+                                step.put("thought", ta.getThought() != null ? ta.getThought() : "");
+                                step.put("action", ta.getAction() != null ? ta.getAction() : "");
+                                step.put("action_input", ta.getActionInput() != null ? ta.getActionInput() : "");
+                                return step;
+                            })
+                            .collect(Collectors.toList()));
+                }
+
+                // 发送完成标记
+                handler.sendComplete(finalResult);
+
+                log.info("✅ Streaming response completed in {}ms, sessionId: {}", duration, sessionId);
+
+            } catch (Exception e) {
+                log.error("❌ Error in streaming chat", e);
+                handler.sendError("Error: " + e.getMessage());
+            } finally {
+                try {
+                    handler.close();
+                } catch (Exception e) {
+                    log.error("❌ 关闭流式处理器时出错: {}", e.getMessage());
+                }
+            }
+        });
+
+        return emitter;
     }
 
     /**
