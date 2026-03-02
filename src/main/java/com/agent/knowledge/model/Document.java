@@ -25,6 +25,9 @@ public class Document {
     /** 文档内容 */
     private String content;
 
+    /** 文档摘要 */
+    private String summary;
+
     /** 知识库类别/标签 */
     private String category;
 

@@ -300,6 +300,13 @@ Thought:
 
 ---
 
+## 启动
+cd /Users/limengya/Work/IdeaProjects/agent0228 && \
+mvn clean package -DskipTests && \
+export DEEPSEEK_API_KEY="sk-6c677513426744a6833bd437bbc8733c" && \
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 \
+  -jar target/agent0228-1.0.0.jar
+
 ## 📌 下一步计划
 
 完成快速入门版后：

@@ -45,6 +45,12 @@
   - 搜索算法
   - 存储机制
 
+- **想设置监控和性能指标?** → [MONITORING_GUIDE.md](MONITORING_GUIDE.md)
+  - 实时监控仪表板
+  - 指标收集和存储
+  - REST API 查询
+  - 性能优化建议
+
 ---
 
 ## 📋 文档一览表
@@ -52,11 +58,14 @@
 | 文档名称 | 长度 | 适合人群 | 主要内容 |
 |---------|------|---------|---------|
 | [STREAMING_QUICK_REF.md](STREAMING_QUICK_REF.md) | 10分钟 | 所有用户 | API 速览、代码片段、快速查询 |
+| [MONITORING_QUICK_REF.md](MONITORING_QUICK_REF.md) | 8分钟 | 运维、开发者 | 监控 API、命令速览、快速诊断 |
 | [FINAL_SUMMARY.md](FINAL_SUMMARY.md) | 15分钟 | 项目管理、架构师 | 系统全貌、统计数据、关键指标 |
 | [STREAMING_GUIDE.md](STREAMING_GUIDE.md) | 30分钟 | 开发者 | 流式响应完整指南 |
 | [KNOWLEDGE_BASE.md](KNOWLEDGE_BASE.md) | 25分钟 | 开发者 | 知识库使用指南 |
+| [MONITORING_GUIDE.md](MONITORING_GUIDE.md) | 30分钟 | 运维、开发者 | 监控系统完整指南、最佳实践 |
 | [STREAMING_SUMMARY.md](STREAMING_SUMMARY.md) | 35分钟 | 高级开发者 | 流式实现深度分析 |
 | [KNOWLEDGE_BASE_SUMMARY.md](KNOWLEDGE_BASE_SUMMARY.md) | 30分钟 | 高级开发者 | 向量库深度分析 |
+| [MONITORING_IMPLEMENTATION.md](MONITORING_IMPLEMENTATION.md) | 25分钟 | 高级开发者 | 监控系统实现细节、代码示例 |
 | [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md) | 20分钟 | 集成工程师 | 系统集成方法论 |
 
 ---
@@ -98,6 +107,24 @@
 5. 安全漏洞扫描 (15分钟)
 ```
 
+### 路径 E：运维监控 (45分钟)
+```
+1. 阅读 MONITORING_QUICK_REF.md (8分钟) - 快速命令和常见问题
+2. 打开监控仪表板 (2分钟) - http://localhost:8080/monitoring-dashboard.html
+3. 阅读 MONITORING_GUIDE.md (20分钟) - 完整功能和使用指南
+4. 集成到现有项目 (15分钟) - 参考代码示例集成指标收集
+```
+
+### 路径 F：全栈生产系统 (3小时)
+```
+1. FINAL_SUMMARY.md (15分钟) - 了解全貌
+2. STREAMING_GUIDE.md (20分钟) - 流式响应
+3. KNOWLEDGE_BASE.md (15分钟) - 知识库
+4. MONITORING_GUIDE.md (15分钟) - 监控系统
+5. 部署和配置 (30分钟)
+6. 性能测试和优化 (45分钟)
+```
+
 ---
 
 ## 🔗 按功能分类
@@ -113,6 +140,13 @@
 - 完整指南：[KNOWLEDGE_BASE.md](KNOWLEDGE_BASE.md)
 - 实现细节：[KNOWLEDGE_BASE_SUMMARY.md](KNOWLEDGE_BASE_SUMMARY.md)
 - 源代码：`KnowledgeBaseManager.java`
+
+### 监控和指标 (Monitoring)
+- 快速参考：[MONITORING_QUICK_REF.md](MONITORING_QUICK_REF.md)
+- 完整指南：[MONITORING_GUIDE.md](MONITORING_GUIDE.md)
+- 实现细节：[MONITORING_IMPLEMENTATION.md](MONITORING_IMPLEMENTATION.md)
+- 仪表板：http://localhost:8080/monitoring-dashboard.html
+- 源代码：`src/main/java/com/agent/monitoring/`
 
 ### 集成方案
 - 全面对比：[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)
@@ -160,6 +194,22 @@
 **答案**：按照生产清单逐步检查
 - 详见：[FINAL_SUMMARY.md - 生产清单](FINAL_SUMMARY.md#-生产清单)
 - 详见：[STREAMING_GUIDE.md - 生产部署](STREAMING_GUIDE.md)
+
+### 问题：如何监控系统性能和指标？
+**答案**：打开监控仪表板或查询监控 API
+- 仪表板：http://localhost:8080/monitoring-dashboard.html
+- 详见：[MONITORING_QUICK_REF.md - 快速命令](MONITORING_QUICK_REF.md)
+- 详见：[MONITORING_GUIDE.md - 完整指南](MONITORING_GUIDE.md)
+
+### 问题：如何诊断 API 响应缓慢？
+**答案**：使用监控系统查看响应时间分布和慢查询
+- 详见：[MONITORING_QUICK_REF.md - 常见问题排查](MONITORING_QUICK_REF.md#-常见问题排查)
+- 详见：[MONITORING_GUIDE.md - 故障排除](MONITORING_GUIDE.md#-故障排除)
+
+### 问题：如何在代码中集成业务指标收集？
+**答案**：注入 MetricsCollector，调用相应的记录方法
+- 详见：[MONITORING_IMPLEMENTATION.md - 代码示例](MONITORING_IMPLEMENTATION.md#-集成到现有代码)
+- 详见：[MONITORING_GUIDE.md - 手动记录](MONITORING_GUIDE.md#-在代码中手动记录)
 
 ---
 
