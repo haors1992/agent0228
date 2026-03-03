@@ -9,6 +9,8 @@ import com.agent.tool.executor.ToolExecutor;
 import com.agent.tool.model.ToolCall;
 import com.agent.tool.model.ToolResult;
 import com.agent.reasoning.prompt.SystemPromptBuilder;
+import com.agent.reasoning.context.ContextManager;
+import com.agent.reasoning.context.HistoryCompressor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,6 +25,11 @@ import java.util.stream.Collectors;
  * Reasoning Engine
  * 
  * Core logic for Agent's reasoning loop (ReACT framework)
+ * 
+ * Integrated with ContextManager for intelligent context management:
+ * - Automatic history compression
+ * - Token-aware conversation management
+ * - Smart summarization of old messages
  */
 @Slf4j
 @Component
@@ -32,6 +39,7 @@ public class ReasoningEngine {
     private final ToolExecutor toolExecutor;
     private final SystemPromptBuilder promptBuilder;
     private final KnowledgeBaseManager knowledgeBaseManager;
+    private final ContextManager contextManager;
 
     @Value("${agent.max-iterations:10}")
     private Integer maxIterations;
@@ -47,11 +55,13 @@ public class ReasoningEngine {
 
     public ReasoningEngine(LLMService llmService, ToolExecutor toolExecutor,
             SystemPromptBuilder promptBuilder,
-            KnowledgeBaseManager knowledgeBaseManager) {
+            KnowledgeBaseManager knowledgeBaseManager,
+            ContextManager contextManager) {
         this.llmService = llmService;
         this.toolExecutor = toolExecutor;
         this.promptBuilder = promptBuilder;
         this.knowledgeBaseManager = knowledgeBaseManager;
+        this.contextManager = contextManager;
     }
 
     /**
@@ -87,14 +97,10 @@ public class ReasoningEngine {
             // Build system prompt with domain detection
             String systemPrompt = promptBuilder.buildSystemPromptWithDomainDetection(userQuery);
 
-            // Initialize conversation messages
-            List<Message> messages = new ArrayList<>();
-            messages.add(Message.builder()
-                    .role("system")
-                    .content(systemPrompt)
-                    .build());
+            // Initialize context manager
+            contextManager.initializeWithSystemPrompt(systemPrompt);
 
-            // Add conversation history for context
+            // Add conversation history for context using ContextManager
             if (conversationHistory != null && !conversationHistory.isEmpty()) {
                 for (String history : conversationHistory) {
                     // Parse role and content from formatted history (ROLE: content)
@@ -108,13 +114,10 @@ public class ReasoningEngine {
                             continue;
                         }
 
-                        messages.add(Message.builder()
-                                .role(role)
-                                .content(content)
-                                .build());
+                        contextManager.addMessage(role, content);
                     }
                 }
-                log.info("✅ Context loaded: {} previous messages added", messages.size() - 1);
+                log.info("✅ Context loaded: {} previous messages added", contextManager.getMessageCount());
             }
 
             // Add knowledge base context if enabled
@@ -135,11 +138,7 @@ public class ReasoningEngine {
                                 result.getSummary()));
                     }
 
-                    messages.add(Message.builder()
-                            .role("system")
-                            .content(knowledgeContext.toString())
-                            .build());
-
+                    contextManager.addMessage("system", knowledgeContext.toString());
                     log.info("🧠 Knowledge base context added: {} documents", knowledgeResults.size());
                 }
             }
@@ -159,19 +158,23 @@ public class ReasoningEngine {
 
                 // Add user query on first iteration
                 if (iteration == 0) {
-                    messages.add(Message.builder()
-                            .role("user")
-                            .content(userQuery)
-                            .build());
+                    contextManager.addUserMessage(userQuery);
                 } else {
                     // Add previous observation to continue reasoning
                     if (!context.getToolResults().isEmpty()) {
                         ToolResult lastResult = context.getToolResults().get(context.getToolResults().size() - 1);
-                        messages.add(Message.builder()
-                                .role("user")
-                                .content("Observation: " + lastResult.getResult())
-                                .build());
+                        contextManager.addObservation(lastResult.getResult());
                     }
+                }
+
+                // Get messages from context manager (will auto-compress if needed)
+                List<Message> messages = contextManager.getMessagesForLLM();
+
+                // Log context compression if it happened
+                HistoryCompressor.CompressionResult compressionResult = contextManager.getLastCompressionResult();
+                if (compressionResult != null && compressionResult.getWasCompressed()) {
+                    log.info("🗜️  Context compressed at iteration {}: saved {} tokens",
+                            iteration + 1, compressionResult.getTokensSaved());
                 }
 
                 // Call LLM to get thought and action
@@ -184,10 +187,7 @@ public class ReasoningEngine {
 
                 String llmResponse = response.getContent();
                 log.debug("LLM response: {}", llmResponse);
-                messages.add(Message.builder()
-                        .role("assistant")
-                        .content(llmResponse)
-                        .build());
+                contextManager.addAssistantMessage(llmResponse);
 
                 // Parse the response
                 ThoughtAction thoughtAction = parseResponse(llmResponse);
@@ -200,6 +200,7 @@ public class ReasoningEngine {
                             : llmResponse;
                     context.finish(finalAnswer);
                     log.info("Agent reasoning completed after {} iterations", iteration + 1);
+                    log.info(contextManager.getContextSummary());
                     return context;
                 }
 
@@ -221,6 +222,7 @@ public class ReasoningEngine {
                 context.finish("Max iterations reached without finding answer.");
             }
 
+            log.info(contextManager.getContextSummary());
             return context;
 
         } catch (Exception e) {

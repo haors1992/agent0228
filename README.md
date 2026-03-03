@@ -677,3 +677,21 @@ MIT License - 详见 LICENSE 文件
 - 📚 [ReACT 论文](https://arxiv.org/abs/2210.03629)
 - 🧠 [Chain-of-Thought Prompting](https://arxiv.org/abs/2201.11903)
 - 🎓 [Spring Boot 官方文档](https://spring.io/projects/spring-boot)
+
+### OpenClaw
+// Step 1: 强化工具定义（本周）
+- 给每个 @Tool 添加详细 schema
+- 编写工具调用的示例（few-shot）
+- 添加重试逻辑
+
+// Step 2: 实现上下文压缩（下周）
+- 记录每轮的"思考"和"结果" 
+- 定期生成摘要而不是完整历史
+- 丢弃 > 3 轮之前的细节
+
+// Step 3: 集成浏览器控制（第 3 周）
+- 引入 Playwright Java 客户端
+- 实现基础的"打开网页→找元素→点击"
+- 支持截图返回给 LLM 判断
+
+做出可演示的版本，达到 OpenClaw 入门级别 💪
