@@ -1,6 +1,7 @@
 package com.agent.tool.industry;
 
 import com.agent.tool.annotation.Tool;
+import com.agent.tool.annotation.ToolParam;
 import com.agent.tool.model.ToolResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Component;
 /**
  * 房产行业工具集
  * 提供房产估价、政策查询、客户管理等功能
+ * 
+ * 演示使用新的 @Tool 注解系统，包含详细的 schema、examples、重试配置
  */
 @Slf4j
 @Component
@@ -17,7 +20,12 @@ public class RealEstateTools {
      * 房产估价工具
      * 根据位置、户型、年龄估算房价
      */
-    @Tool(name = "housing_estimate", description = "根据房产信息（地点、户型、年龄）估算合理房价。输入格式：'地址,户型,年龄' 如 '朝阳区建国路,2房2厅,5年'")
+    @Tool(name = "housing_estimate", description = "根据房产信息（地点、户型、年龄）估算合理房价", params = @ToolParam(name = "input", type = "string", description = "房产信息，格式：'地址,户型,年龄' 例如：'朝阳区建国路,2房2厅,5年'", example = "朝阳区建国路,2房2厅,5年", required = true), returnDescription = "估价结果，包括基价、户型系数、年龄折扣等详细信息", examples = {
+            "Input: 朝阳区建国路,2房2厅,5年",
+            "Output: 📍 朝阳区建国路 估价结果...",
+            "Input: 浦东新区世纪大道,3房2厅,10年",
+            "Output: 📍 浦东新区世纪大道 估价结果..."
+    }, maxRetries = 2, timeoutMs = 10000, tags = { "real-estate", "estimation" })
     public ToolResult estimateHousingPrice(String input) {
         try {
             String[] parts = input.split(",");
@@ -56,7 +64,13 @@ public class RealEstateTools {
     /**
      * 政策查询工具
      */
-    @Tool(name = "policy_query", description = "查询房产相关政策（限购、限售、税费等）。输入为城市名，如：'北京' 或 '上海'")
+    @Tool(name = "policy_query", description = "查询房产相关政策（限购、限售、税费等）", params = @ToolParam(name = "city", type = "string", description = "城市名称", example = "北京", enum_ = {
+            "北京", "上海", "深圳", "杭州", "南京" }, required = true), returnDescription = "该城市的限购、限售、税费等房产政策", examples = {
+                    "Input: 北京",
+                    "Output: 🏛️ 北京房产政策速查...",
+                    "Input: 上海",
+                    "Output: 🏛️ 上海房产政策速查..."
+            }, maxRetries = 1, timeoutMs = 5000, tags = { "real-estate", "policy" })
     public ToolResult queryPolicy(String city) {
         try {
             String cityName = city.trim();
@@ -110,7 +124,12 @@ public class RealEstateTools {
     /**
      * 客户匹配工具
      */
-    @Tool(name = "client_matching", description = "根据客户需求推荐房产。输入格式：'预算(万),户型,地点' 如'500,2房2厅,朝阳区'")
+    @Tool(name = "client_matching", description = "根据客户需求推荐房产（预算、户型、地点）", params = @ToolParam(name = "input", type = "string", description = "客户信息，格式：'预算(万),户型,地点' 例如：'500,2房2厅,朝阳区'", example = "500,2房2厅,朝阳区", required = true), returnDescription = "推荐的房源列表，包括价格、特点和建议", examples = {
+            "Input: 500,2房2厅,朝阳区",
+            "Output: 🏠 根据您的需求进行房源推荐...",
+            "Input: 800,3房2厅,浦东新区",
+            "Output: 🏠 根据您的需求进行房源推荐..."
+    }, maxRetries = 2, timeoutMs = 8000, tags = { "real-estate", "matching" })
     public ToolResult matchClients(String input) {
         try {
             String[] parts = input.split(",");
@@ -157,7 +176,10 @@ public class RealEstateTools {
     /**
      * 户型评估工具
      */
-    @Tool(name = "housing_evaluation", description = "评估户型质量。输入格式：'面积(㎡),朝向,楼层,配套' 如'120,南北通透,7层,学区房'")
+    @Tool(name = "housing_evaluation", description = "评估户型质量（面积、朝向、楼层、配套）", params = @ToolParam(name = "input", type = "string", description = "户型信息，格式：'面积(㎡),朝向,楼层,配套' 例如：'120,南北通透,7层,学区房'", example = "120,南北通透,7层,学区房", required = true), returnDescription = "户型综合评估报告，包括评分和投资建议", examples = {
+            "Input: 120,南北通透,7层,学区房",
+            "Output: 🏠 户型评估报告..."
+    }, maxRetries = 1, timeoutMs = 6000, tags = { "real-estate", "evaluation" })
     public ToolResult evaluateHousing(String input) {
         try {
             String[] parts = input.split(",");
@@ -191,7 +213,10 @@ public class RealEstateTools {
     /**
      * 交易费用计算工具
      */
-    @Tool(name = "transaction_fee", description = "计算房产交易的各项费用。输入格式：'房价(万),城市,户型面积' 如'500,北京,120'")
+    @Tool(name = "transaction_fee", description = "计算房产交易的各项费用（契税、中介费、评估费等）", params = @ToolParam(name = "input", type = "string", description = "交易信息，格式：'房价(万),城市,户型面积(㎡)' 例如：'500,北京,120'", example = "500,北京,120", required = true), returnDescription = "费用明细，包括契税、中介费、评估费等总额", examples = {
+            "Input: 500,北京,120",
+            "Output: 💰 房产交易费用明细..."
+    }, maxRetries = 1, timeoutMs = 5000, tags = { "real-estate", "fee" })
     public ToolResult calculateTransactionFee(String input) {
         try {
             String[] parts = input.split(",");
