@@ -77,7 +77,7 @@ public class MetricsCollector {
         }
 
         storageService.recordMetrics(metrics);
-        log.debug("📊 API 指标已记录: {} - {} ms", endpoint, responseTime);
+        log.trace("📊 API 指标已记录: {} - {} ms", endpoint, responseTime);
     }
 
     /**
@@ -106,7 +106,7 @@ public class MetricsCollector {
         }
 
         storageService.recordMetrics(metrics);
-        log.debug("🧠 推理指标已记录: 迭代 {} 次，耗时 {} ms", iterations, responseTime);
+        log.trace("🧠 推理指标已记录: 迭代 {} 次，耗时 {} ms", iterations, responseTime);
     }
 
     /**

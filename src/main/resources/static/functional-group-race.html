@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>有机官能团识别竞赛</title>
+    <style>
+        :root {
+            --bg-1: #f2f6fa;
+            --bg-2: #dde8f3;
+            --ink: #1f2d3d;
+            --brand: #005f73;
+            --brand-2: #0a9396;
+            --warn: #ee9b00;
+            --danger: #bb3e03;
+            --card: #ffffff;
+            --line: #cfdae7;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Avenir Next", "PingFang SC", "Noto Sans SC", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 8% 10%, rgba(10,147,150,0.20), transparent 35%),
+                radial-gradient(circle at 95% 18%, rgba(238,155,0,0.24), transparent 35%),
+                linear-gradient(160deg, var(--bg-1), var(--bg-2));
+            min-height: 100vh;
+            padding: 16px;
+        }
+        .shell {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 14px;
+        }
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: 0 10px 30px rgba(8, 27, 51, 0.07);
+        }
+        .hero {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        h1,h2,h3 { margin: 0; }
+        .hero p { margin: 4px 0 0; color: #54657e; }
+        .hidden { display: none !important; }
+        .room-tag {
+            background: linear-gradient(135deg, var(--brand), var(--brand-2));
+            color: #fff;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-weight: 700;
+        }
+        .login-panel {
+            grid-column: 1 / -1;
+        }
+        .login-grid {
+            display: grid;
+            grid-template-columns: 150px 1fr 1fr 150px 120px;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+        }
+        .login-info {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #455a73;
+        }
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        input, button, textarea, select {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            min-height: 40px;
+            padding: 8px 10px;
+            font-size: 14px;
+        }
+        button {
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        button:active { transform: translateY(1px); }
+        .btn-main { background: linear-gradient(135deg, var(--brand), var(--brand-2)); }
+        .btn-sub { background: linear-gradient(135deg, #246eb9, #3d5a80); }
+        .btn-warn { background: linear-gradient(135deg, #e76f51, #bb3e03); }
+        .btn-gray { background: linear-gradient(135deg, #5c677d, #495057); }
+        .timer-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .timer {
+            min-width: 150px;
+            text-align: center;
+            border-radius: 14px;
+            padding: 8px 10px;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            font-size: 38px;
+            line-height: 1;
+            font-weight: 800;
+            color: #7c2d12;
+            letter-spacing: 2px;
+        }
+        .timer.danger {
+            background: linear-gradient(135deg, #fecaca, #fca5a5);
+            color: #991b1b;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.72; }
+        }
+        .question-meta { color: #5b6a7f; margin-bottom: 8px; }
+        .question-body p { margin: 8px 0; }
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .option {
+            border: 1px solid #bfd0dd;
+            border-radius: 12px;
+            background: #f8fcff;
+            padding: 12px;
+            text-align: left;
+            color: #1f2d3d;
+            font-weight: 700;
+        }
+        .option:hover { border-color: #0a9396; }
+        .status { min-height: 24px; margin-top: 8px; font-weight: 700; }
+        .ok { color: #0a7f5a; }
+        .err { color: #bb3e03; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border-bottom: 1px solid var(--line); padding: 8px 6px; font-size: 13px; text-align: left; }
+        .inline-help { margin-top: 8px; color: #5c6d81; font-size: 12px; }
+        .settings-row {
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            align-items: center;
+        }
+        .toggle-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #30445c;
+            background: #f6f9fc;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            min-height: 40px;
+            padding: 8px 10px;
+        }
+        .bank-item {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 8px;
+            margin: 6px 0;
+            background: #fbfdff;
+            font-size: 12px;
+        }
+        .bank-item label {
+            display: grid;
+            grid-template-columns: 20px 1fr;
+            column-gap: 10px;
+            align-items: flex-start;
+            cursor: pointer;
+        }
+        .bank-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            min-height: 16px;
+            margin-top: 2px;
+            padding: 0;
+        }
+        .muted { color: #61728a; }
+        textarea { min-height: 78px; resize: vertical; }
+        .role-teacher .student-only,
+        .role-student .teacher-only,
+        .not-logged-in .role-only {
+            display: none !important;
+        }
+        .not-logged-in .manage-panel,
+        .not-logged-in .question-panel,
+        .not-logged-in .rank-panel {
+            display: none;
+        }
+        .teacher-mode .shell { max-width: 100%; grid-template-columns: 1fr 1fr; }
+        .teacher-mode .question-panel { grid-column: 1 / 2; }
+        .teacher-mode .rank-panel { grid-column: 2 / 3; }
+        .teacher-mode .manage-panel, .teacher-mode .bank-panel { display: none; }
+        .teacher-mode .timer { font-size: 72px; min-width: 220px; }
+        .teacher-mode .question-title { font-size: 42px; }
+        .teacher-mode .question-body { font-size: 28px; }
+        .teacher-mode .option { font-size: 24px; padding: 18px; }
+        .teacher-mode th, .teacher-mode td { font-size: 24px; padding: 12px 8px; }
+        .presentation-mode .hero,
+        .presentation-mode .login-panel,
+        .presentation-mode .manage-panel,
+        .presentation-mode .bank-panel,
+        .presentation-mode .history-panel {
+            display: none !important;
+        }
+        .presentation-mode .shell {
+            max-width: 100%;
+            grid-template-columns: 1fr 1fr;
+        }
+        .presentation-mode .question-panel { grid-column: 1 / 2; }
+        .presentation-mode .rank-panel { grid-column: 2 / 3; }
+        .screen-exit-btn {
+            position: fixed;
+            right: 16px;
+            top: 16px;
+            width: auto;
+            min-width: 132px;
+            z-index: 999;
+            border-radius: 999px;
+            padding: 10px 14px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+        }
+        .history-list {
+            max-height: 320px;
+            overflow: auto;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #f9fbfd;
+            padding: 8px;
+            margin-top: 8px;
+        }
+        @media (max-width: 980px) {
+            .shell { grid-template-columns: 1fr; }
+            .options, .actions-grid { grid-template-columns: 1fr; }
+            .settings-row { grid-template-columns: 1fr; }
+            .login-grid { grid-template-columns: 1fr; }
+            .hero { flex-direction: column; align-items: flex-start; }
+            .timer { font-size: 34px; min-width: 120px; }
+            .presentation-mode .shell { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body class="not-logged-in">
+<div class="shell">
+    <section class="panel hero">
+        <div>
+            <h1>有机官能团识别竞赛</h1>
+            <p>老师创建房间后分享链接，学生手机打开即可实时比赛。</p>
+        </div>
+        <div id="roomTag" class="room-tag">房间: 未创建</div>
+    </section>
+
+    <section class="panel login-panel">
+        <h2>角色登录</h2>
+        <div class="login-grid">
+            <select id="loginRole" onchange="onLoginRoleChange()">
+                <option value="teacher">老师</option>
+                <option value="student">学生</option>
+            </select>
+            <input id="loginName" list="savedAccounts" placeholder="输入姓名后登录" />
+            <input id="loginStudentId" class="student-only" placeholder="学号（可选）" />
+            <input id="loginRoom" class="student-only" placeholder="学生登录可直接填房间号（可选）" oninput="onLoginRoomChanged()" />
+            <button class="btn-main" onclick="loginUser()">登录</button>
+            <button class="btn-gray" onclick="logoutUser()">退出</button>
+        </div>
+        <datalist id="savedAccounts"></datalist>
+        <datalist id="roomStudentOptions"></datalist>
+        <div id="loginInfo" class="login-info">未登录。账号会保存在当前浏览器。</div>
+    </section>
+
+    <section class="panel manage-panel role-only">
+        <h2>课堂控制</h2>
+        <div class="actions-grid" style="margin-top:8px;">
+            <input id="teacherName" class="teacher-only" placeholder="老师姓名" readonly />
+            <button class="btn-main teacher-only" onclick="createRoom()">创建房间</button>
+            <input id="roomCode" placeholder="房间号（6位）" />
+            <input id="studentName" class="student-only" placeholder="学生姓名" readonly />
+            <button class="btn-sub student-only" onclick="joinRoom()">加入比赛</button>
+            <button class="btn-main teacher-only" onclick="startRace()">开始比赛</button>
+            <button class="btn-sub teacher-only" onclick="nextQuestion()">下一题</button>
+            <button class="btn-warn teacher-only" onclick="finishRace()">结束比赛</button>
+            <button class="btn-warn teacher-only" onclick="copyJoinUrl()">复制参赛链接</button>
+            <button class="btn-gray teacher-only" onclick="toggleTeacherMode()">老师端大屏模式</button>
+            <button class="btn-gray teacher-only" onclick="togglePresentationMode()">仅看教学大屏</button>
+            <button class="btn-gray teacher-only" onclick="downloadCsv()">赛后成绩导出 CSV</button>
+            <button class="btn-sub teacher-only" onclick="toggleBankPanel()">题库管理</button>
+        </div>
+        <div class="settings-row teacher-only">
+            <select id="questionCountSelect">
+                <option value="5">5 题</option>
+                <option value="10" selected>10 题</option>
+                <option value="15">15 题</option>
+                <option value="20">20 题</option>
+            </select>
+            <select id="durationSelect">
+                <option value="20">每题 20 秒</option>
+                <option value="30" selected>每题 30 秒</option>
+                <option value="45">每题 45 秒</option>
+            </select>
+            <div class="toggle-wrap">
+                <input id="autoNextToggle" type="checkbox" checked style="width:auto; min-height:auto;" />
+                <span>倒计时归零自动切题</span>
+            </div>
+            <button class="btn-sub" onclick="applyRoomSettings()">应用比赛设置</button>
+        </div>
+        <div class="inline-help">大屏模式将自动尝试全屏并放大题目、倒计时和排行榜。</div>
+        <div id="status" class="status"></div>
+
+        <h3 class="teacher-only" style="margin-top: 12px;">学生账号管理（姓名 + 学号）</h3>
+        <div class="actions-grid teacher-only" style="margin-top:8px;">
+            <input id="rosterName" placeholder="学生姓名" />
+            <input id="rosterId" placeholder="学号（可选）" />
+            <button class="btn-sub" onclick="addStudentAccountByTeacher()">添加参赛学生</button>
+            <input id="rosterSearch" list="rosterOptions" placeholder="输入可匹配，选择后删除" />
+            <button class="btn-warn" onclick="removeSelectedStudentAccount()">删除选中学生</button>
+        </div>
+        <datalist id="rosterOptions"></datalist>
+        <div id="rosterStatus" class="status"></div>
+        <div id="rosterList" class="history-list"></div>
+    </section>
+
+    <section class="panel question-panel role-only">
+        <div class="timer-wrap">
+            <h2 class="question-title">当前题目</h2>
+            <div id="timer" class="timer">--</div>
+        </div>
+        <div id="questionMeta" class="question-meta">等待比赛开始...</div>
+        <div id="questionArea" class="question-body"></div>
+        <div id="answerResult" class="status"></div>
+    </section>
+
+    <section class="panel rank-panel role-only">
+        <h2>实时排行榜</h2>
+        <table>
+            <thead>
+            <tr><th>名次</th><th>姓名</th><th>分数</th><th>正确/作答</th></tr>
+            </thead>
+            <tbody id="leaderboardBody"></tbody>
+        </table>
+    </section>
+
+    <section id="bankPanel" class="panel bank-panel hidden" style="grid-column: 1 / -1;">
+        <h2>自定义题库管理（含大模型搜索）</h2>
+        <div class="actions-grid" style="margin-top:8px;">
+            <input id="chapterName" placeholder="章节名称（如：烃的衍生物）" />
+            <input id="customMolecule" placeholder="物质名称（如：乙酸丁酯）" />
+            <input id="customFormula" placeholder="分子式/简式（如：CH3COO(CH2)3CH3）" />
+            <input id="customHint" placeholder="结构线索（如：含 -COO-）" />
+            <input id="customGroup" placeholder="正确官能团（如：酯基）" />
+            <button class="btn-main" onclick="addManualQuestion()">手工添加到题库</button>
+        </div>
+
+        <div class="actions-grid" style="margin-top:10px;">
+            <input id="csvFile" type="file" accept=".csv" />
+            <button class="btn-sub" onclick="importCsvFile()">CSV 预览并导入</button>
+            <textarea id="llmPrompt" placeholder="输入搜索指令，例如：生成10个高一有机官能团识别题，覆盖醇、醛、酮、羧酸、酯"></textarea>
+            <button class="btn-sub" onclick="searchByLLM()">通过大模型搜索题目</button>
+        </div>
+
+        <div class="inline-help">CSV 列顺序：moleculeName,formula,structureHint,correctGroup,chapter。</div>
+        <div id="bankStatus" class="status"></div>
+        <div id="candidateList"></div>
+        <button class="btn-main" onclick="uploadSelectedCandidates()" style="max-width: 280px; margin-top: 8px;">上传勾选题目到题库</button>
+        <div class="inline-help muted" id="bankSummary"></div>
+        <div class="actions-grid" style="margin-top:8px;">
+            <button class="btn-gray" onclick="refreshQuestionBankHistory()">刷新历史题库列表</button>
+        </div>
+        <div id="questionBankHistory" class="history-list"></div>
+    </section>
+
+    <section class="panel history-panel role-only" style="grid-column: 1 / -1;">
+        <h2>比赛历史记录</h2>
+        <div class="actions-grid" style="margin-top:8px;">
+            <button class="btn-sub teacher-only" onclick="refreshRaceHistory()">刷新全班历史</button>
+            <button class="btn-sub student-only" onclick="refreshStudentHistory()">查看我的历史成绩</button>
+        </div>
+        <div id="raceHistoryStatus" class="status"></div>
+        <div id="raceHistoryList" class="history-list"></div>
+    </section>
+</div>
+<button id="screenExitBtn" class="btn-warn screen-exit-btn hidden" onclick="exitLargeScreenModes()">退出大屏</button>
+
+<script>
+    const ACCOUNT_STORE_KEY = "chemRaceSavedAccountsV1";
+    const LOGIN_SESSION_KEY = "chemRaceLoginSessionV1";
+    const state = {
+        roomCode: "",
+        studentName: "",
+        studentId: "",
+        teacherJoinUrl: "",
+        room: null,
+        userRole: "",
+        userName: "",
+        isLoggedIn: false,
+        isTeacherMode: false,
+        isPresentationMode: false,
+        bankPanelOpen: false,
+        candidates: [],
+        questionBankAll: [],
+        globalStudentAccounts: [],
+        raceHistory: [],
+        autoNextInFlight: false,
+        autoNextQuestionSignature: ""
+    };
+
+    function loadAccountStore() {
+        try {
+            const raw = localStorage.getItem(ACCOUNT_STORE_KEY);
+            if (!raw) {
+                return { teachers: [], students: [], lastRole: "teacher", lastName: "" };
+            }
+            const parsed = JSON.parse(raw);
+            return {
+                teachers: Array.isArray(parsed.teachers) ? parsed.teachers : [],
+                students: Array.isArray(parsed.students) ? parsed.students : [],
+                lastRole: parsed.lastRole === "student" ? "student" : "teacher",
+                lastName: typeof parsed.lastName === "string" ? parsed.lastName : ""
+            };
+        } catch (e) {
+            return { teachers: [], students: [], lastRole: "teacher", lastName: "" };
+        }
+    }
+
+    function saveAccountStore(store) {
+        localStorage.setItem(ACCOUNT_STORE_KEY, JSON.stringify(store));
+    }
+
+    function rememberAccount(role, name) {
+        const clean = String(name || "").trim();
+        if (!clean) {
+            return;
+        }
+        const store = loadAccountStore();
+        const key = role === "student" ? "students" : "teachers";
+        const list = store[key].filter(x => x !== clean);
+        list.unshift(clean);
+        store[key] = list.slice(0, 20);
+        store.lastRole = role;
+        store.lastName = clean;
+        saveAccountStore(store);
+    }
+
+    function fillSavedAccountOptions(role) {
+        const store = loadAccountStore();
+        const list = role === "student" ? store.students : store.teachers;
+        const datalist = document.getElementById("savedAccounts");
+        datalist.innerHTML = list.map(name => '<option value="' + escapeHtml(name) + '"></option>').join("");
+    }
+
+    function onLoginRoleChange() {
+        const role = document.getElementById("loginRole").value;
+        const roomInput = document.getElementById("loginRoom");
+        const nameInput = document.getElementById("loginName");
+        roomInput.classList.toggle("hidden", role !== "student");
+        document.getElementById("loginStudentId").classList.toggle("hidden", role !== "student");
+        nameInput.setAttribute("list", role === "student" ? "roomStudentOptions" : "savedAccounts");
+        fillSavedAccountOptions(role);
+        if (role === "student") {
+            onLoginRoomChanged();
+        }
+    }
+
+    async function onLoginRoomChanged() {
+        if (document.getElementById("loginRole").value !== "student") {
+            return;
+        }
+        const roomCode = document.getElementById("loginRoom").value.trim();
+        const datalist = document.getElementById("roomStudentOptions");
+        if (!roomCode) {
+            datalist.innerHTML = "";
+            return;
+        }
+        try {
+            const data = await getApi("/api/chem-race/rooms/" + encodeURIComponent(roomCode) + "/state");
+            const accounts = (data.room && data.room.studentAccounts) ? data.room.studentAccounts : [];
+            datalist.innerHTML = accounts.map(a => '<option value="' + escapeHtml(a.displayName || a.studentName) + '"></option>').join("");
+        } catch (e) {
+            datalist.innerHTML = "";
+        }
+    }
+
+    function applyRoleUi() {
+        document.body.classList.remove("role-teacher", "role-student", "not-logged-in");
+        if (!state.isLoggedIn) {
+            document.body.classList.add("not-logged-in");
+            document.getElementById("loginInfo").textContent = "未登录。账号会保存在当前浏览器。";
+            state.isTeacherMode = false;
+            state.isPresentationMode = false;
+            document.body.classList.remove("teacher-mode", "presentation-mode");
+            updateScreenExitButton();
+            return;
+        }
+        document.body.classList.add(state.userRole === "teacher" ? "role-teacher" : "role-student");
+        document.getElementById("loginInfo").textContent =
+            "已登录: " + (state.userRole === "teacher" ? "老师" : "学生") + " - " + state.userName;
+    }
+
+    async function loginUser() {
+        try {
+            const role = document.getElementById("loginRole").value;
+            let name = document.getElementById("loginName").value.trim();
+            let studentId = document.getElementById("loginStudentId").value.trim();
+            if (!name) {
+                throw new Error("请输入登录姓名");
+            }
+            if (role === "student") {
+                const parsed = parseDisplayName(name);
+                if (parsed.name) {
+                    name = parsed.name;
+                }
+                if (!studentId && parsed.studentId) {
+                    studentId = parsed.studentId;
+                    document.getElementById("loginStudentId").value = studentId;
+                }
+            }
+            state.userRole = role;
+            state.userName = name;
+            state.isLoggedIn = true;
+            rememberAccount(role, name);
+            applyRoleUi();
+
+            if (role === "teacher") {
+                document.getElementById("teacherName").value = name;
+                await refreshGlobalStudentAccounts();
+                renderStudentRoster(null);
+                toast("老师登录成功，可创建并管理比赛");
+            } else {
+                document.getElementById("studentName").value = name;
+                state.studentName = name;
+                state.studentId = studentId;
+                const room = document.getElementById("loginRoom").value.trim();
+                if (room) {
+                    document.getElementById("roomCode").value = room;
+                    state.roomCode = room;
+                    refreshRoomTag();
+                }
+                toast("学生登录成功，请先加入房间");
+            }
+            saveLoginSession();
+            if (state.userRole === "teacher") {
+                await refreshRaceHistory();
+            } else {
+                await refreshStudentHistory();
+            }
+        } catch (e) {
+            toast(e.message, "err");
+        }
+    }
+
+    async function logoutUser() {
+        await exitLargeScreenModes();
+        state.userRole = "";
+        state.userName = "";
+        state.isLoggedIn = false;
+        state.room = null;
+        state.roomCode = "";
+        state.studentName = "";
+        state.studentId = "";
+        state.teacherJoinUrl = "";
+        state.bankPanelOpen = false;
+        document.getElementById("loginStudentId").value = "";
+        document.getElementById("rosterSearch").value = "";
+        document.getElementById("bankPanel").classList.add("hidden");
+        document.getElementById("raceHistoryList").innerHTML = "";
+        document.getElementById("questionBankHistory").innerHTML = "";
+        document.getElementById("questionArea").innerHTML = "";
+        document.getElementById("questionMeta").textContent = "等待比赛开始...";
+        document.getElementById("answerResult").textContent = "";
+        document.getElementById("leaderboardBody").innerHTML = '<tr><td colspan="4">暂无数据</td></tr>';
+        refreshRoomTag();
+        applyRoleUi();
+        clearLoginSession();
+        toast("已退出登录");
+    }
+
+    function restoreLastLoginHint() {
+        const store = loadAccountStore();
+        document.getElementById("loginRole").value = store.lastRole || "teacher";
+        document.getElementById("loginName").value = store.lastName || "";
+        onLoginRoleChange();
+    }
+
+    function saveLoginSession() {
+        const payload = {
+            isLoggedIn: state.isLoggedIn,
+            userRole: state.userRole,
+            userName: state.userName,
+            roomCode: state.roomCode,
+            studentName: state.studentName,
+            studentId: state.studentId,
+            bankPanelOpen: state.bankPanelOpen
+        };
+        localStorage.setItem(LOGIN_SESSION_KEY, JSON.stringify(payload));
+    }
+
+    function clearLoginSession() {
+        localStorage.removeItem(LOGIN_SESSION_KEY);
+    }
+
+    async function restoreLoginSession() {
+        try {
+            const raw = localStorage.getItem(LOGIN_SESSION_KEY);
+            if (!raw) {
+                return;
+            }
+            const parsed = JSON.parse(raw);
+            if (!parsed || !parsed.isLoggedIn || !parsed.userRole || !parsed.userName) {
+                return;
+            }
+
+            state.userRole = parsed.userRole === "student" ? "student" : "teacher";
+            state.userName = String(parsed.userName || "").trim();
+            state.isLoggedIn = !!state.userName;
+            if (!state.isLoggedIn) {
+                return;
+            }
+
+            document.getElementById("loginRole").value = state.userRole;
+            document.getElementById("loginName").value = state.userName;
+            onLoginRoleChange();
+            applyRoleUi();
+
+            if (state.userRole === "teacher") {
+                document.getElementById("teacherName").value = state.userName;
+            } else {
+                document.getElementById("studentName").value = state.userName;
+                state.studentName = state.userName;
+                state.studentId = String(parsed.studentId || "").trim();
+                document.getElementById("loginStudentId").value = state.studentId;
+            }
+
+            const room = String(parsed.roomCode || "").trim();
+            if (room) {
+                state.roomCode = room;
+                document.getElementById("roomCode").value = room;
+                document.getElementById("loginRoom").value = room;
+                refreshRoomTag();
+                if (state.userRole === "student") {
+                    try {
+                        await postApi("/api/chem-race/rooms/" + encodeURIComponent(room) + "/join", {
+                            studentName: state.userName,
+                            studentId: state.studentId
+                        });
+                    } catch (e) {
+                        // ignore restore-join errors
+                    }
+                }
+                await pullState();
+            }
+
+            state.bankPanelOpen = !!parsed.bankPanelOpen && state.userRole === "teacher";
+            document.getElementById("bankPanel").classList.toggle("hidden", !state.bankPanelOpen);
+            if (state.bankPanelOpen) {
+                await refreshBankSummary();
+                await refreshQuestionBankHistory();
+            }
+
+            if (state.userRole === "teacher") {
+                await refreshRaceHistory();
+            } else {
+                await refreshStudentHistory();
+            }
+            toast("已自动恢复上次登录状态");
+        } catch (e) {
+            // ignore invalid persisted session
+        }
+    }
+
+    function ensureRole(role) {
+        if (!state.isLoggedIn) {
+            throw new Error("请先登录");
+        }
+        if (state.userRole !== role) {
+            throw new Error("当前操作仅限" + (role === "teacher" ? "老师" : "学生") + "角色");
+        }
+    }
+
+    function toast(message, type = "ok", targetId = "status") {
+        const status = document.getElementById(targetId);
+        status.className = "status " + (type === "ok" ? "ok" : "err");
+        status.textContent = message;
+    }
+
+    async function getApi(path) {
+        const r = await fetch(path);
+        const data = await r.json();
+        if (!r.ok) {
+            throw new Error(data.error || "请求失败");
+        }
+        return data;
+    }
+
+    async function postApi(path, body) {
+        const r = await fetch(path, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body || {})
+        });
+        const data = await r.json();
+        if (!r.ok) {
+            throw new Error(data.error || "请求失败");
+        }
+        return data;
+    }
+
+    function refreshRoomTag() {
+        document.getElementById("roomTag").textContent = state.roomCode ? "房间: " + state.roomCode : "房间: 未创建";
+    }
+
+    function syncSettingsFromRoom(room) {
+        if (!room) {
+            return;
+        }
+        if (typeof room.maxQuestionCount === "number") {
+            syncQuestionCountOptions(room.maxQuestionCount);
+        }
+        if (typeof room.questionCount === "number") {
+            document.getElementById("questionCountSelect").value = String(room.questionCount);
+        }
+        if (typeof room.questionDurationSeconds === "number") {
+            const durationSelect = document.getElementById("durationSelect");
+            const value = String(room.questionDurationSeconds);
+            const optionExists = Array.from(durationSelect.options).some(o => o.value === value);
+            if (!optionExists) {
+                const opt = document.createElement("option");
+                opt.value = value;
+                opt.textContent = "每题 " + value + " 秒";
+                durationSelect.appendChild(opt);
+            }
+            durationSelect.value = value;
+        }
+        document.getElementById("autoNextToggle").checked = !!room.autoNextEnabled;
+    }
+
+    function updateTimer(room) {
+        const timer = document.getElementById("timer");
+        if (!room || typeof room.remainingSeconds !== "number") {
+            timer.textContent = "--";
+            timer.classList.remove("danger");
+            return;
+        }
+        const sec = Math.max(0, room.remainingSeconds);
+        const mm = String(Math.floor(sec / 60)).padStart(2, "0");
+        const ss = String(sec % 60).padStart(2, "0");
+        timer.textContent = mm + ":" + ss;
+        if (sec <= 8 && room.status === "RUNNING") {
+            timer.classList.add("danger");
+        } else {
+            timer.classList.remove("danger");
+        }
+    }
+
+    function renderQuestion(room) {
+        const meta = document.getElementById("questionMeta");
+        const area = document.getElementById("questionArea");
+        updateTimer(room);
+
+        if (!room || !room.question) {
+            meta.textContent = "等待题目加载";
+            area.innerHTML = "";
+            return;
+        }
+
+        meta.textContent = "第 " + (room.currentQuestionIndex + 1) + " / " + room.totalQuestions + " 题 | 状态: " + room.status;
+        const q = room.question;
+        const options = (q.options || []).map(opt => {
+            return '<button class="option" onclick="submitAnswer(\'' + escapeHtml(opt) + '\')">' + escapeHtml(opt) + '</button>';
+        }).join("");
+
+        area.innerHTML =
+            '<p><b>物质:</b> ' + escapeHtml(q.moleculeName) + '</p>' +
+            '<p><b>分子式/结构线索:</b> ' + escapeHtml(q.formula) + '（' + escapeHtml(q.structureHint) + '）</p>' +
+            '<div class="options">' + options + '</div>';
+    }
+
+    function renderLeaderboard(room) {
+        const tbody = document.getElementById("leaderboardBody");
+        const rows = (room && room.leaderboard ? room.leaderboard : []).map(item => {
+            return '<tr><td>' + item.rank + '</td><td>' + escapeHtml(item.studentName) + '</td><td>' + item.score + '</td><td>' + item.correctCount + ' / ' + item.totalAnswered + '</td></tr>';
+        }).join("");
+        tbody.innerHTML = rows || '<tr><td colspan="4">暂无数据</td></tr>';
+    }
+
+    async function createRoom() {
+        try {
+            ensureRole("teacher");
+            const teacherName = state.userName;
+            const data = await postApi("/api/chem-race/rooms", { teacherName: teacherName });
+            state.roomCode = data.room.roomCode;
+            state.teacherJoinUrl = data.joinUrl;
+            state.room = data.room;
+            document.getElementById("roomCode").value = state.roomCode;
+            refreshRoomTag();
+            renderQuestion(state.room);
+            renderLeaderboard(state.room);
+            syncSettingsFromRoom(state.room);
+            renderStudentRoster(state.room);
+            saveLoginSession();
+            toast("房间创建成功: " + state.roomCode);
+        } catch (e) {
+            toast(e.message, "err");
+        }
+    }
+
+    async function joinRoom() {
+        try {
+            ensureRole("student");
+            const roomCode = document.getElementById("roomCode").value.trim();
+            const studentName = state.userName;
+            if (!roomCode || !studentName) {
+                throw new Error("请填写房间号和学生姓名");
+            }
+            const studentId = state.studentId || document.getElementById("loginStudentId").value.trim();
+            state.studentId = studentId;
+            const data = await postApi("/api/chem-race/rooms/" + encodeURIComponent(roomCode) + "/join", {
+                studentName: studentName,
+                studentId: studentId
+            });
+            state.roomCode = roomCode;
+            state.studentName = studentName;
+            state.room = data.room;
+            refreshRoomTag();
+            renderQuestion(state.room);
+            renderLeaderboard(state.room);
+            syncSettingsFromRoom(state.room);
+            renderStudentRoster(state.room);
+            saveLoginSession();
+            toast("加入成功，等待开始");
+        } catch (e) {
+            toast(e.message, "err");
+        }
+    }
+
+    async function startRace() {
+        try {
+            ensureRole("teacher");
+            if (!state.roomCode) {
+                throw new Error("请先创建或加入房间");
+            }
+            const data = await postApi("/api/chem-race/rooms/" + encodeURIComponent(state.roomCode) + "/start");
+            state.room = data.room;
+            renderQuestion(state.room);
+            renderLeaderboard(state.room);
+            syncSettingsFromRoom(state.room);
+            renderStudentRoster(state.room);
+            toast("比赛已开始");
+        } catch (e) {
+            toast(e.message, "err");
+        }
+    }
+
+    async function finishRace() {
+        try {
+            ensureRole("teacher");
+            if (!state.roomCode) {
+                throw new Error("请先创建房间");
+            }
+            const data = await postApi("/api/chem-race/rooms/" + encodeURIComponent(state.roomCode) + "/finish");
+            state.room = data.room;
+            renderQuestion(state.room);
+            renderLeaderboard(state.room);
+            syncSettingsFromRoom(state.room);
+            renderStudentRoster(state.room);
+            toast("比赛已结束");
+            await refreshRaceHistory();
+        } catch (e) {
+            toast(e.message, "err");
+        }
+    }
+
+    async function nextQuestion(isAuto) {
+        try {
+            ensureRole("teacher");
+            if (!state.roomCode) {
+                throw new Error("请先创建或加入房间");
+            }
+            const data = await postApi("/api/chem-race/rooms/" + encodeURIComponent(state.roomCode) + "/next");
+            state.room = data.room;
+            renderQuestion(state.room);
+            renderLeaderboard(state.room);
+            syncSettingsFromRoom(state.room);
+            if (state.room.status === "FINISHED") {
+                toast("比赛结束");
+            } else {
+                toast(isAuto ? "时间到，已自动切换下一题" : "已切换下一题");
+            }
+        } catch (e) {
+            toast(e.message, "err");
+        }
+    }
+
+    async function submitAnswer(option) {
+        try {
+            ensureRole("student");
+            if (!state.roomCode || !state.studentName) {
+                throw new Error("请先加入房间后再作答");
+            }
+            const data = await postApi("/api/chem-race/rooms/" + encodeURIComponent(state.roomCode) + "/answer", {
+                studentName: state.studentName,
+                selectedGroup: option
+            });
+            const result = data.result;
+            const resultEl = document.getElementById("answerResult");
+            resultEl.className = "status " + (result.correct ? "ok" : "err");
+            resultEl.textContent =
+                (result.correct ? "回答正确" : "回答错误") +
+                " | 本次 " + (result.deltaScore >= 0 ? "+" : "") + result.deltaScore +
+                " 分 | 总分 " + result.totalScore + " | 当前第 " + result.rank + " 名";
+            await pullState();
+        } catch (e) {
+            toast(e.message, "err");
+        }
+    }
+
+    async function pullState() {
+        if (!state.roomCode) {
+            return;
+        }
+        try {
+            const data = await getApi("/api/chem-race/rooms/" + encodeURIComponent(state.roomCode) + "/state");
+            state.room = data.room;
+            renderQuestion(state.room);
+            renderLeaderboard(state.room);
+            syncSettingsFromRoom(state.room);
+            renderStudentRoster(state.room);
+            await tryAutoNextByTimer();
+        } catch (e) {
+            // ignore polling errors
+        }
+    }
+
+    async function applyRoomSettings() {
+        try {
+            ensureRole("teacher");
+            if (!state.roomCode) {
+                throw new Error("请先创建或加入房间");
+            }
+            const duration = parseInt(document.getElementById("durationSelect").value, 10);
+            const autoNextEnabled = document.getElementById("autoNextToggle").checked;
+            const payload = {
+                questionDurationSeconds: duration,
+                autoNextEnabled: autoNextEnabled
+            };
+            if (!state.room || state.room.status === "WAITING") {
+                payload.questionCount = parseInt(document.getElementById("questionCountSelect").value, 10);
+            }
+            const data = await postApi("/api/chem-race/rooms/" + encodeURIComponent(state.roomCode) + "/settings", payload);
+            state.room = data.room;
+            renderQuestion(state.room);
+            renderLeaderboard(state.room);
+            syncSettingsFromRoom(state.room);
+            renderStudentRoster(state.room);
+            toast("比赛设置已更新");
+        } catch (e) {
+            toast(e.message, "err");
+        }
+    }
+
+    async function tryAutoNextByTimer() {
+        if (state.userRole !== "teacher" || !state.room) {
+            return;
+        }
+        if (!state.room.autoNextEnabled) {
+            return;
+        }
+        if (state.room.status !== "RUNNING" || state.room.remainingSeconds > 0) {
+            return;
+        }
+
+        const signature = state.room.roomCode + ":" + state.room.currentQuestionIndex;
+        if (state.autoNextQuestionSignature === signature || state.autoNextInFlight) {
+            return;
+        }
+
+        state.autoNextInFlight = true;
+        state.autoNextQuestionSignature = signature;
+        try {
+            await nextQuestion(true);
+        } finally {
+            state.autoNextInFlight = false;
+        }
+    }
+
+    async function copyJoinUrl() {
+        try {
+            ensureRole("teacher");
+            if (!state.teacherJoinUrl && state.roomCode) {
+                state.teacherJoinUrl = window.location.origin + "/functional-group-race.html?room=" + state.roomCode;
+            }
+            if (!state.teacherJoinUrl) {
+                throw new Error("请先创建房间");
+            }
+            await navigator.clipboard.writeText(state.teacherJoinUrl);
+            toast("参赛链接已复制: " + state.teacherJoinUrl);
+        } catch (e) {
+            toast(e.message, "err");
+        }
+    }
+
+    async function downloadCsv() {
+        try {
+            ensureRole("teacher");
+            if (!state.roomCode) {
+                throw new Error("请先创建或加入房间");
+            }
+            const url = "/api/chem-race/rooms/" + encodeURIComponent(state.roomCode) + "/leaderboard/csv";
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "leaderboard.csv";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            toast("CSV 下载已触发");
+        } catch (e) {
+            toast(e.message, "err");
+        }
+    }
+
+    async function toggleTeacherMode() {
+        ensureRole("teacher");
+        state.isTeacherMode = !state.isTeacherMode;
+        document.body.classList.toggle("teacher-mode", state.isTeacherMode);
+        if (state.isTeacherMode) {
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    await document.documentElement.requestFullscreen();
+                }
+                toast("已进入老师端大屏模式");
+            } catch (e) {
+                toast("已切换样式，但浏览器阻止自动全屏，请手动按 F11", "err");
+            }
+        } else {
+            if (document.fullscreenElement && document.exitFullscreen) {
+                await document.exitFullscreen();
+            }
+            toast("已退出大屏模式");
+        }
+        updateScreenExitButton();
+    }
+
+    function updateScreenExitButton() {
+        const btn = document.getElementById("screenExitBtn");
+        const show = state.isTeacherMode || state.isPresentationMode || !!document.fullscreenElement;
+        btn.classList.toggle("hidden", !show);
+    }
+
+    async function exitLargeScreenModes() {
+        state.isTeacherMode = false;
+        state.isPresentationMode = false;
+        document.body.classList.remove("teacher-mode", "presentation-mode");
+        if (document.fullscreenElement && document.exitFullscreen) {
+            try {
+                await document.exitFullscreen();
+            } catch (e) {
+                // ignore exit fullscreen error
+            }
+        }
+        updateScreenExitButton();
+    }
+
+    async function togglePresentationMode() {
+        ensureRole("teacher");
+        const entering = !state.isPresentationMode;
+        if (entering) {
+            state.isPresentationMode = true;
+            state.isTeacherMode = true;
+            document.body.classList.add("presentation-mode", "teacher-mode");
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    await document.documentElement.requestFullscreen();
+                }
+                toast("已进入纯展示教学大屏");
+            } catch (e) {
+                toast("已进入纯展示模式，浏览器阻止了自动全屏", "err");
+            }
+        } else {
+            await exitLargeScreenModes();
+            toast("已退出纯展示模式");
+        }
+        updateScreenExitButton();
+    }
+
+    function addManualQuestion() {
+        if (state.userRole !== "teacher") {
+            toast("仅老师可管理题库", "err", "bankStatus");
+            return;
+        }
+        const chapter = document.getElementById("chapterName").value.trim();
+        const moleculeName = document.getElementById("customMolecule").value.trim();
+        const formula = document.getElementById("customFormula").value.trim();
+        const structureHint = document.getElementById("customHint").value.trim();
+        const correctGroup = document.getElementById("customGroup").value.trim();
+        if (!moleculeName || !formula || !structureHint || !correctGroup) {
+            toast("请完整填写手工题目字段", "err", "bankStatus");
+            return;
+        }
+        state.candidates.unshift({ moleculeName, formula, structureHint, correctGroup, chapter, selected: true });
+        renderCandidates();
+        toast("已加入待上传列表", "ok", "bankStatus");
+    }
+
+    function importCsvFile() {
+        if (state.userRole !== "teacher") {
+            toast("仅老师可管理题库", "err", "bankStatus");
+            return;
+        }
+        const file = document.getElementById("csvFile").files[0];
+        if (!file) {
+            toast("请先选择 CSV 文件", "err", "bankStatus");
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function() {
+            try {
+                const text = String(reader.result || "");
+                const rows = text.split(/\r?\n/).filter(line => line.trim());
+                const parsed = [];
+                for (let i = 0; i < rows.length; i++) {
+                    const cols = splitCsvLine(rows[i]);
+                    if (cols.length < 4) {
+                        continue;
+                    }
+                    const maybeHeader = (cols[0] || "").toLowerCase();
+                    if (i === 0 && maybeHeader.indexOf("molecule") >= 0) {
+                        continue;
+                    }
+                    parsed.push({
+                        moleculeName: (cols[0] || "").trim(),
+                        formula: (cols[1] || "").trim(),
+                        structureHint: (cols[2] || "").trim(),
+                        correctGroup: (cols[3] || "").trim(),
+                        chapter: (cols[4] || "").trim(),
+                        selected: true
+                    });
+                }
+                state.candidates = parsed.concat(state.candidates);
+                renderCandidates();
+                toast("CSV 解析完成，已加入待上传列表: " + parsed.length + " 题", "ok", "bankStatus");
+            } catch (e) {
+                toast("CSV 解析失败: " + e.message, "err", "bankStatus");
+            }
+        };
+        reader.readAsText(file, "UTF-8");
+    }
+
+    async function searchByLLM() {
+        if (state.userRole !== "teacher") {
+            toast("仅老师可管理题库", "err", "bankStatus");
+            return;
+        }
+        const prompt = document.getElementById("llmPrompt").value.trim();
+        if (!prompt) {
+            toast("请输入大模型搜索指令", "err", "bankStatus");
+            return;
+        }
+        toast("正在调用大模型生成题目...", "ok", "bankStatus");
+        try {
+            const query =
+                "你是高中化学老师助教。请按 JSON 数组输出题目，不要任何解释。" +
+                "每个元素字段: moleculeName, formula, structureHint, correctGroup, chapter。" +
+                "要求只输出数组 JSON。指令: " + prompt;
+            const data = await postApi("/api/agent/chat", { query: query, includeDetails: false });
+            const text = String(data.result || "");
+            const list = extractJsonArray(text);
+            const items = list.map(item => ({
+                moleculeName: String(item.moleculeName || "").trim(),
+                formula: String(item.formula || "").trim(),
+                structureHint: String(item.structureHint || "").trim(),
+                correctGroup: String(item.correctGroup || "").trim(),
+                chapter: String(item.chapter || "大模型生成").trim(),
+                selected: true
+            })).filter(q => q.moleculeName && q.formula && q.structureHint && q.correctGroup);
+            state.candidates = items.concat(state.candidates);
+            renderCandidates();
+            toast("大模型返回 " + items.length + " 题，已加入待上传", "ok", "bankStatus");
+        } catch (e) {
+            toast("大模型解析失败: " + e.message, "err", "bankStatus");
+        }
+    }
+
+    async function uploadSelectedCandidates() {
+        try {
+            ensureRole("teacher");
+            const selected = state.candidates.filter(x => x.selected);
+            if (selected.length === 0) {
+                throw new Error("请先勾选要上传的题目");
+            }
+            const payload = { questions: selected.map(x => ({
+                moleculeName: x.moleculeName,
+                formula: x.formula,
+                structureHint: x.structureHint,
+                correctGroup: x.correctGroup,
+                chapter: x.chapter
+            })) };
+            const data = await postApi("/api/chem-race/question-bank/import", payload);
+            toast("上传成功: " + data.added + " 题", "ok", "bankStatus");
+            state.candidates = state.candidates.filter(x => !x.selected);
+            renderCandidates();
+            await refreshBankSummary();
+            await refreshQuestionBankHistory();
+        } catch (e) {
+            toast(e.message, "err", "bankStatus");
+        }
+    }
+
+    async function refreshBankSummary() {
+        try {
+            const data = await getApi("/api/chem-race/question-bank");
+            const total = data.total || 0;
+            const customCount = (data.questions || []).filter(q => q.custom).length;
+            document.getElementById("bankSummary").textContent = "当前题库总量: " + total + "，自定义题: " + customCount;
+        } catch (e) {
+            document.getElementById("bankSummary").textContent = "题库统计获取失败";
+        }
+    }
+
+    async function refreshQuestionBankHistory() {
+        try {
+            const data = await getApi("/api/chem-race/question-bank");
+            const questions = Array.isArray(data.questions) ? data.questions : [];
+            state.questionBankAll = questions;
+            const root = document.getElementById("questionBankHistory");
+            if (!questions.length) {
+                root.innerHTML = '<div class="inline-help">题库为空。</div>';
+                return;
+            }
+            root.innerHTML = questions.slice(0, 500).map(q => {
+                const actions = q.custom
+                    ? '<div style="margin-top:6px; display:flex; gap:6px;">' +
+                        '<button class="btn-sub" style="width:auto; min-height:30px; padding:4px 10px;" onclick="editCustomQuestion(\'' + escapeHtml(q.id) + '\')">修改</button>' +
+                        '<button class="btn-warn" style="width:auto; min-height:30px; padding:4px 10px;" onclick="deleteCustomQuestion(\'' + escapeHtml(q.id) + '\')">删除</button>' +
+                      '</div>'
+                    : '<div class="inline-help">内置题（仅查看）</div>';
+                return '<div class="bank-item"><div><b>' + escapeHtml(q.moleculeName) + '</b> | ' +
+                    escapeHtml(q.formula) + '<br><span class="muted">' + escapeHtml(q.structureHint) +
+                    ' | 官能团: ' + escapeHtml(q.correctGroup) + ' | 章节: ' +
+                    escapeHtml(q.chapter || '未分类') + '</span>' + actions + '</div></div>';
+            }).join("");
+        } catch (e) {
+            document.getElementById("questionBankHistory").innerHTML = '<div class="inline-help err">历史题库加载失败</div>';
+        }
+    }
+
+    async function editCustomQuestion(questionId) {
+        try {
+            ensureRole("teacher");
+            const target = state.questionBankAll.find(q => q.id === questionId);
+            if (!target || !target.custom) {
+                throw new Error("仅支持修改自定义题");
+            }
+            const moleculeName = window.prompt("物质名称", target.moleculeName || "");
+            if (moleculeName === null) {
+                return;
+            }
+            const formula = window.prompt("分子式/简式", target.formula || "");
+            if (formula === null) {
+                return;
+            }
+            const structureHint = window.prompt("结构线索", target.structureHint || "");
+            if (structureHint === null) {
+                return;
+            }
+            const correctGroup = window.prompt("正确官能团", target.correctGroup || "");
+            if (correctGroup === null) {
+                return;
+            }
+            const chapter = window.prompt("章节", target.chapter || "");
+            if (chapter === null) {
+                return;
+            }
+            await postApi("/api/chem-race/question-bank/" + encodeURIComponent(questionId), {
+                moleculeName,
+                formula,
+                structureHint,
+                correctGroup,
+                chapter
+            });
+            toast("题目已修改", "ok", "bankStatus");
+            await refreshBankSummary();
+            await refreshQuestionBankHistory();
+        } catch (e) {
+            toast(e.message, "err", "bankStatus");
+        }
+    }
+
+    async function deleteCustomQuestion(questionId) {
+        try {
+            ensureRole("teacher");
+            const ok = window.confirm("确认删除该自定义题目？");
+            if (!ok) {
+                return;
+            }
+            const response = await fetch("/api/chem-race/question-bank/" + encodeURIComponent(questionId), {
+                method: "DELETE"
+            });
+            const body = await response.json();
+            if (!response.ok) {
+                throw new Error(body.error || "删除失败");
+            }
+            toast("题目已删除", "ok", "bankStatus");
+            await refreshBankSummary();
+            await refreshQuestionBankHistory();
+        } catch (e) {
+            toast(e.message, "err", "bankStatus");
+        }
+    }
+
+    function renderRaceHistoryList(records, mode) {
+        const root = document.getElementById("raceHistoryList");
+        if (!records.length) {
+            root.innerHTML = '<div class="inline-help">暂无历史记录。</div>';
+            return;
+        }
+        root.innerHTML = records.map(item => {
+            const dt = new Date(item.finishedAt || Date.now());
+            const top = (item.leaderboard || []).slice(0, mode === "student" ? 1 : 3).map(x => {
+                return '#' + x.rank + ' ' + escapeHtml(x.studentName) + ' ' + x.score + '分';
+            }).join(' | ');
+            return '<div class="bank-item"><div><b>房间 ' + escapeHtml(item.roomCode || '-') + '</b> | 老师: ' +
+                escapeHtml(item.teacherName || '-') + ' | 结束: ' + escapeHtml(dt.toLocaleString()) + '<br>' +
+                '<span class="muted">题量: ' + (item.totalQuestions || 0) + ' | ' + top + '</span></div></div>';
+        }).join("");
+    }
+
+    async function refreshRaceHistory() {
+        if (state.userRole !== "teacher") {
+            return;
+        }
+        try {
+            const data = await getApi("/api/chem-race/history");
+            const list = Array.isArray(data.history) ? data.history : [];
+            state.raceHistory = list;
+            renderRaceHistoryList(list, "teacher");
+            toast("已加载历史记录: " + list.length + " 场", "ok", "raceHistoryStatus");
+        } catch (e) {
+            toast("加载历史记录失败: " + e.message, "err", "raceHistoryStatus");
+        }
+    }
+
+    async function refreshStudentHistory() {
+        if (state.userRole !== "student" || !state.userName) {
+            return;
+        }
+        try {
+            const displayName = state.studentId ? (state.userName + "[" + state.studentId + "]") : state.userName;
+            const data = await getApi("/api/chem-race/history/student/" + encodeURIComponent(displayName));
+            const list = Array.isArray(data.history) ? data.history : [];
+            renderRaceHistoryList(list, "student");
+            toast("已加载你的历史成绩: " + list.length + " 场", "ok", "raceHistoryStatus");
+        } catch (e) {
+            toast("加载历史成绩失败: " + e.message, "err", "raceHistoryStatus");
+        }
+    }
+
+    function renderCandidates() {
+        const root = document.getElementById("candidateList");
+        if (!state.candidates.length) {
+            root.innerHTML = '<div class="inline-help">暂无待上传题目。</div>';
+            return;
+        }
+        root.innerHTML = state.candidates.map((q, idx) => {
+            return '<div class="bank-item">' +
+                '<label><input type="checkbox" ' + (q.selected ? 'checked' : '') + ' onchange="toggleCandidate(' + idx + ', this.checked)" />' +
+                '<div><b>' + escapeHtml(q.moleculeName) + '</b> | ' + escapeHtml(q.formula) + '<br>' +
+                '<span class="muted">' + escapeHtml(q.structureHint) + ' | 官能团: ' + escapeHtml(q.correctGroup) + ' | 章节: ' + escapeHtml(q.chapter || '未分类') + '</span></div></label></div>';
+        }).join("");
+    }
+
+    function toggleCandidate(idx, checked) {
+        if (state.candidates[idx]) {
+            state.candidates[idx].selected = checked;
+        }
+    }
+
+    function toggleBankPanel() {
+        if (state.userRole !== "teacher") {
+            return;
+        }
+        state.bankPanelOpen = !state.bankPanelOpen;
+        const panel = document.getElementById("bankPanel");
+        panel.classList.toggle("hidden", !state.bankPanelOpen);
+        saveLoginSession();
+        if (state.bankPanelOpen) {
+            refreshBankSummary();
+            refreshQuestionBankHistory();
+        }
+    }
+
+    function splitCsvLine(line) {
+        const out = [];
+        let current = "";
+        let inQuote = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') {
+                if (inQuote && line[i + 1] === '"') {
+                    current += '"';
+                    i++;
+                } else {
+                    inQuote = !inQuote;
+                }
+            } else if (ch === ',' && !inQuote) {
+                out.push(current);
+                current = "";
+            } else {
+                current += ch;
+            }
+        }
+        out.push(current);
+        return out;
+    }
+
+    function extractJsonArray(text) {
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            const start = text.indexOf("[");
+            const end = text.lastIndexOf("]");
+            if (start < 0 || end <= start) {
+                throw new Error("未找到 JSON 数组");
+            }
+            const slice = text.substring(start, end + 1);
+            return JSON.parse(slice);
+        }
+    }
+
+    function parseDisplayName(text) {
+        const value = String(text || "").trim();
+        const m = value.match(/^(.*)\[(.*)\]$/);
+        if (!m) {
+            return { name: value, studentId: "" };
+        }
+        return { name: m[1].trim(), studentId: m[2].trim() };
+    }
+
+    function syncQuestionCountOptions(maxCount) {
+        const select = document.getElementById("questionCountSelect");
+        const current = select.value;
+        const candidates = [5, 10, 15, 20, 30, 40, maxCount];
+        const unique = [];
+        for (let i = 0; i < candidates.length; i++) {
+            const n = candidates[i];
+            if (!n || n < 1 || n > maxCount || unique.indexOf(n) >= 0) {
+                continue;
+            }
+            unique.push(n);
+        }
+        unique.sort((a, b) => a - b);
+        select.innerHTML = unique.map(n => '<option value="' + n + '">' + n + ' 题</option>').join("");
+        if (unique.indexOf(parseInt(current, 10)) >= 0) {
+            select.value = current;
+        }
+    }
+
+    function renderStudentRoster(room) {
+        const listEl = document.getElementById("rosterList");
+        const datalist = document.getElementById("rosterOptions");
+        const accounts = (room && Array.isArray(room.studentAccounts))
+            ? room.studentAccounts
+            : state.globalStudentAccounts;
+        if (!accounts.length) {
+            listEl.innerHTML = '<div class="inline-help">暂无名单，学生可自由加入。</div>';
+            datalist.innerHTML = "";
+            return;
+        }
+        datalist.innerHTML = accounts.map(a => '<option value="' + escapeHtml(a.displayName || a.studentName) + '"></option>').join("");
+        listEl.innerHTML = accounts.map(a => {
+            return '<div class="bank-item"><div><b>' + escapeHtml(a.studentName) + '</b>' +
+                (a.studentId ? ' | 学号: ' + escapeHtml(a.studentId) : '') +
+                '</div></div>';
+        }).join("");
+        if (room && state.userRole === "student" && state.roomCode === room.roomCode) {
+            const studentOptions = document.getElementById("roomStudentOptions");
+            studentOptions.innerHTML = datalist.innerHTML;
+        }
+    }
+
+    async function refreshGlobalStudentAccounts() {
+        try {
+            const data = await getApi("/api/chem-race/students/global");
+            state.globalStudentAccounts = Array.isArray(data.students) ? data.students : [];
+            if (!state.roomCode) {
+                renderStudentRoster(null);
+            }
+        } catch (e) {
+            // ignore global roster load errors
+        }
+    }
+
+    async function addStudentAccountByTeacher() {
+        try {
+            ensureRole("teacher");
+            const studentName = document.getElementById("rosterName").value.trim();
+            const studentId = document.getElementById("rosterId").value.trim();
+            if (!studentName) {
+                throw new Error("请输入学生姓名");
+            }
+            if (state.roomCode) {
+                const data = await postApi("/api/chem-race/rooms/" + encodeURIComponent(state.roomCode) + "/students", {
+                    studentName: studentName,
+                    studentId: studentId
+                });
+                state.room = data.room;
+                renderStudentRoster(state.room);
+            } else {
+                const data = await postApi("/api/chem-race/students/global", {
+                    studentName: studentName,
+                    studentId: studentId
+                });
+                state.globalStudentAccounts = Array.isArray(data.students) ? data.students : [];
+                renderStudentRoster(null);
+            }
+            document.getElementById("rosterName").value = "";
+            document.getElementById("rosterId").value = "";
+            toast("学生账号添加成功", "ok", "rosterStatus");
+        } catch (e) {
+            toast(e.message, "err", "rosterStatus");
+        }
+    }
+
+    async function removeSelectedStudentAccount() {
+        try {
+            ensureRole("teacher");
+            const selected = document.getElementById("rosterSearch").value.trim();
+            if (!selected) {
+                throw new Error("请先输入或选择一个学生");
+            }
+            const parsed = parseDisplayName(selected);
+            const url = state.roomCode
+                ? "/api/chem-race/rooms/" + encodeURIComponent(state.roomCode) + "/students"
+                : "/api/chem-race/students/global";
+            const data = await fetch(url, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ studentName: parsed.name, studentId: parsed.studentId })
+            });
+            const body = await data.json();
+            if (!data.ok) {
+                throw new Error(body.error || "删除失败");
+            }
+            if (state.roomCode) {
+                state.room = body.room;
+                renderStudentRoster(state.room);
+            } else {
+                state.globalStudentAccounts = Array.isArray(body.students) ? body.students : [];
+                renderStudentRoster(null);
+            }
+            document.getElementById("rosterSearch").value = "";
+            toast("学生账号已移除", "ok", "rosterStatus");
+        } catch (e) {
+            toast(e.message, "err", "rosterStatus");
+        }
+    }
+
+    function escapeHtml(str) {
+        return String(str || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function loadFromQuery() {
+        const params = new URLSearchParams(window.location.search);
+        const room = params.get("room");
+        if (room) {
+            document.getElementById("roomCode").value = room;
+            document.getElementById("loginRoom").value = room;
+            state.roomCode = room;
+            refreshRoomTag();
+            saveLoginSession();
+        }
+    }
+
+    document.addEventListener("fullscreenchange", updateScreenExitButton);
+
+    async function initPage() {
+        applyRoleUi();
+        restoreLastLoginHint();
+        renderCandidates();
+        loadFromQuery();
+        await refreshGlobalStudentAccounts();
+        await restoreLoginSession();
+        if (state.userRole === "teacher") {
+            await refreshQuestionBankHistory();
+            if (!state.roomCode) {
+                renderStudentRoster(null);
+            }
+        }
+        updateScreenExitButton();
+    }
+
+    setInterval(pullState, 1000);
+    initPage();
+</script>
+</body>
+</html>

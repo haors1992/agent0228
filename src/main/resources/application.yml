@@ -11,6 +11,7 @@ spring:
 logging:
   level:
     com.agent: DEBUG
+    com.agent.monitoring: INFO
     org.springframework: INFO
     org.springframework.web: INFO
 
@@ -18,7 +19,7 @@ logging:
 llm:
   deepseek:
     enabled: true
-    api-key: xxxxx
+    api-key: xxxx
     base-url: https://api.deepseek.com
     model: deepseek-chat
     max-tokens: 4096
@@ -40,3 +41,15 @@ agent:
 
 server:
   port: 8080
+
+chem-race:
+  storage-path: ./data/chem-race
+
+# Application Configuration - 配置演示
+app:
+  name: AI Agent Application
+  version: 2.0.0
+  features:
+    caching: true
+    monitoring: true
+    maxConnections: 100

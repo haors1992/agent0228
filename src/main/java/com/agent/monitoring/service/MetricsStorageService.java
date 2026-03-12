@@ -92,7 +92,7 @@ public class MetricsStorageService {
                 StandardOpenOption.CREATE,
                 StandardOpenOption.APPEND);
 
-        log.debug("💾 指标已保存: {}", dateStr);
+        log.trace("💾 指标已保存: {}", dateStr);
     }
 
     /**
@@ -116,20 +116,33 @@ public class MetricsStorageService {
      */
     private void logMetrics(Metrics metrics) {
         if ("API".equals(metrics.getMetricsType())) {
-            log.info("📊 API: {} {} - {} ms - {}",
-                    metrics.getHttpMethod(),
-                    metrics.getApiEndpoint(),
-                    metrics.getResponseTime(),
-                    metrics.getStatusCode());
+            Integer statusCode = metrics.getStatusCode();
+            Long responseTime = metrics.getResponseTime();
+            boolean isError = statusCode != null && statusCode >= 400;
+            boolean isSlow = responseTime != null && responseTime >= 2000L;
+
+            if (isError || isSlow) {
+                log.info("📊 API(关键): {} {} - {} ms - {}",
+                        metrics.getHttpMethod(),
+                        metrics.getApiEndpoint(),
+                        metrics.getResponseTime(),
+                        metrics.getStatusCode());
+            } else {
+                log.trace("📊 API: {} {} - {} ms - {}",
+                        metrics.getHttpMethod(),
+                        metrics.getApiEndpoint(),
+                        metrics.getResponseTime(),
+                        metrics.getStatusCode());
+            }
         } else if ("REASONING".equals(metrics.getMetricsType())) {
-            log.info("🧠 REASONING: {} - {} ms - {} 次迭代",
+            log.debug("🧠 REASONING: {} - {} ms - {} 次迭代",
                     metrics.getQuery() != null
                             ? metrics.getQuery().substring(0, Math.min(20, metrics.getQuery().length()))
                             : "",
                     metrics.getResponseTime(),
                     metrics.getIterations());
         } else if ("KNOWLEDGE_BASE".equals(metrics.getMetricsType())) {
-            log.info("📚 KB: 命中 {} 个结果，平均相似度 {:.2f}",
+            log.debug("📚 KB: 命中 {} 个结果，平均相似度 {:.2f}",
                     metrics.getKnowledgeBaseHits(),
                     metrics.getAvgSimilarity() != null ? metrics.getAvgSimilarity() : 0);
         }
